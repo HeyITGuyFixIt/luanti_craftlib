@@ -15,7 +15,12 @@ local organize_recipes = function(key)
 end
 
 core.register_on_mods_loaded(function()
-    local groups = {}
+    local groups = {
+        base = {},
+        input = {},
+        tool = {},
+        output = {}
+    }
     local keys = { "base", "input", "tool", "output" }
     for i, recipe in ipairs(craftlib.registered_crafts) do
         for _, key in ipairs(keys) do
@@ -24,14 +29,15 @@ core.register_on_mods_loaded(function()
                     if string.match(str, "^group:") then
                         local group = string.match(str, "^group:([^ ]+)")
                         local in_groups_yet = false
-                        for _, igroup in ipairs(groups) do
+                        for igroup, _ in pairs(groups[key]) do
                             if group == igroup then
                                 in_groups_yet = true
+                                groups[key][group][#groups[key][group]] = i
                                 break
                             end
                         end
                         if in_groups_yet == false then
-                            groups[#groups] = group
+                            groups[key][group] = {i}
                         end
                     else
                         if craftlib[key..'s'][str] == nil then
@@ -45,13 +51,23 @@ core.register_on_mods_loaded(function()
         end
     end
     for name, def in pairs(core.registered_nodes) do
+        for _,key in ipairs(keys) do
+            for igroup, i in pairs(groups[key]) do
+                for group, _ in pairs(def.groups) do
+                    if group == igroup then
+                        -- local recipe = craftlib.registered_crafts[i]
+                        craftlib[key..'s'][name][#craftlib[key..'s'][name]] = i
+                    end
+                end
+            end
+        end
         if craftlib.registered_crafts[name] then
             local old_on_rightclick = def.on_rightclick
             local old_on_dig = def.on_dig
             core.override_item(name, {
                 on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
                     local item = string.match(itemstack, "^([^ ]+)")
-                    if clicker:get_player_control().sneak and craftlib.is_a_base(pos) then
+                    if clicker:get_player_control().sneak and craftlib.bases(pos) then
                         -- crafting activated
                         craftlib.activate_crafting(pos, node, clicker, itemstack, pointed_thing)
                     end
