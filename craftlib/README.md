@@ -1,4 +1,4 @@
-# luanti_craftlib
+# craftlib
 
 Immersive crafting library mod for Luanti.
 
@@ -31,7 +31,7 @@ You can set the `output` to a list of items that are created from this craft. In
 ```lua
 craftlib.register_craft({
     type = "mix",
-    base = {"recipe:mortar"},
+    base = {"cooking:mortar"},
     input = {"farming:wheat 4"},
     tool = "group:stick",
     output = {"farming:flour"}
@@ -66,6 +66,26 @@ This is a unique type of craft called knapping. The idea is you strike two mater
 * `pattern`: This is a list of lists, each containing a series of 1s and 0s. This creates an 8x8 grid that the player has to tap to remove chunks from the input material.
 
 * `texture`: This is the texture displayed on the entity while knapping. If not specified, it uses the texture of the base item.
+
+### Chisel Craft
+
+```lua
+craftlib.register_craft({
+    type = "chisel",
+    base = {"group:slab"},
+    pattern = {
+        {1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 0, 0, 1, 1, 1},
+        {1, 1, 1, 0, 0, 1, 1, 1},
+        {1, 1, 0, 0, 0, 0, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1}
+    },
+    output = { "metalworking:pattern_anvil" }
+})
+```
 
 ### Tool Repair
 

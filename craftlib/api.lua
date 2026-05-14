@@ -11,16 +11,24 @@ craftlib.register_craft = function (def) {
     if def.base ~= nil and #def.base ~= 0 {
         for _, base in ipairs(def.base) do
             if string.match(base, "^group:") then -- base is a group
-            else -- base is a node
-            end
-            local base_def = core.registered_nodes[base]
-            if base_def then
-                if craftlib.registered_crafts[base] == nil then
-                    craftlib.registered_crafts[base] = {}
+                local group = string.match(base, "^group:([^ ]+)")
+                for node, node_def in pairs(core.registered_nodes) do
+                    if node_def.groups[group] ~= nil then
+                        if craftlib.registered_crafts[node] == nil then
+                            craftlib.registered_crafts[node] = {}
+                        end
+                        craftlib.registered_crafts[node][#craftlib.registered_crafts[node]] = def
+                    end
                 end
-                craftlib.registered_crafts[base][#craftlib.registered_crafts[base]] = def
-            else
-                core.log("warn", "[craftlib] base material ("..base..") is not a registered node.")
+            else -- base is a node
+                if core.registered_nodes[base] ~= nil then
+                    if craftlib.registered_crafts[base] == nil then
+                        craftlib.registered_crafts[base] = {}
+                    end
+                    craftlib.registered_crafts[base][#craftlib.registered_crafts[base]] = def
+                else
+                    core.log("warn", "[craftlib] base material ("..base..") is not a registered node.")
+                end
             end
         end
     } else {

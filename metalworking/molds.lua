@@ -1,0 +1,16 @@
+craftlib.register_craft({
+    type = "knap",
+    base = {"group:slab"},
+    tool = { "group:chisel", "group:axe" },
+    pattern = {
+        {1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 0, 0, 1, 1, 1},
+        {1, 1, 1, 0, 0, 1, 1, 1},
+        {1, 1, 0, 0, 0, 0, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1}
+    },
+    output = { "metalworking:pattern_anvil" }
+})

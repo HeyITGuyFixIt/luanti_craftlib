@@ -1,41 +1,70 @@
 craftlib = {
     path = core.get_modpath(core.get_current_modname()),
-    registered_crafts = {}
+    registered_crafts = {},
+    bases = {},
+    inputs = {},
+    outputs = {},
+    tools = {},
 }
 
 dofile(craftlib.path .. "/api.lua")
 dofile(craftlib.path .. "/crafts.lua")
 
+local organize_recipes = function(key)
+
+end
+
 core.register_on_mods_loaded(function()
+    local groups = {}
+    local keys = { "base", "input", "tool", "output" }
+    for i, recipe in ipairs(craftlib.registered_crafts) do
+        for _, key in ipairs(keys) do
+            if recipe[key] and #recipe[key] > 0 then
+                for _, str in recipe[key] do
+                    if string.match(str, "^group:") then
+                        local group = string.match(str, "^group:([^ ]+)")
+                        local in_groups_yet = false
+                        for _, igroup in ipairs(groups) do
+                            if group == igroup then
+                                in_groups_yet = true
+                                break
+                            end
+                        end
+                        if in_groups_yet == false then
+                            groups[#groups] = group
+                        end
+                    else
+                        if craftlib[key..'s'][str] == nil then
+                            craftlib[key..'s'][str] = {}
+                        end
+                    end
+                    -- save the index from craftlib.registered_crafts
+                    craftlib[key..'s'][str][#craftlib[key..'s'][str]] = i
+                end
+            end
+        end
+    end
     for name, def in pairs(core.registered_nodes) do
         if craftlib.registered_crafts[name] then
+            local old_on_rightclick = def.on_rightclick
+            local old_on_dig = def.on_dig
             core.override_item(name, {
                 on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
                     local item = string.match(itemstack, "^([^ ]+)")
-                    if clicker:get_player_control().sneak then
+                    if clicker:get_player_control().sneak and craftlib.is_a_base(pos) then
                         -- crafting activated
-                        for _, craft in ipairs(craftlib.registered_crafts[name]) do
-                            local item_matches = false
-                            for _, input in ipairs(craft.input) do
-                                if string.match(input, "^group:") then
-                                    local group = string.match(input, "^group:(.+)")
-                                    if core.registered_items[item] and core.registered_items[item].groups[group] then
-                                        item_matches = true
-                                    end
-                                elseif string.match(input, item) then
-                                    item_matches = true
-                                end
-                            end
-                            if item_matches then
-                                -- found matching craft, allow adding
-                                return
-                            end
-                        end
+                        craftlib.activate_crafting(pos, node, clicker, itemstack, pointed_thing)
                     end
-                    return def.on_rightclick(pos, node, clicker, itemstack, pointed_thing)
+                    if old_on_rightclick then
+                        return old_on_rightclick(pos, node, clicker, itemstack, pointed_thing)
+                    end
                 end,
                 on_dig = function(pos, node, digger)
-
+                    if craftlib.is_crafting_activated(pos, node, digger) then
+                    end
+                    if old_on_dig then
+                        return old_on_dig(pos, node, digger)
+                    end
                 end
             })
         else
