@@ -9,6 +9,7 @@ craftlib.register_craft({
 })
 
 craftlib.register_craft({
+    type = "craft",
     base = axe_bases,
     input = {"group:slab"},
     tool = "group:axe",
@@ -16,6 +17,7 @@ craftlib.register_craft({
 })
 
 craftlib.register_craft({
+    type = "craft",
     base = axe_bases,
     input = {"group:wood"},
     tool = "group:axe",

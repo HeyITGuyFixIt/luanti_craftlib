@@ -15,10 +15,10 @@ craftlib.register_craft = function (def) {
             end
             local base_def = core.registered_nodes[base]
             if base_def then
-                if craftlib.crafts[base] == nil then
-                    craftlib.crafts[base] = {}
+                if craftlib.registered_crafts[base] == nil then
+                    craftlib.registered_crafts[base] = {}
                 end
-                craftlib.crafts[base][#craftlib.crafts[base]] = def
+                craftlib.registered_crafts[base][#craftlib.registered_crafts[base]] = def
             else
                 core.log("warn", "[craftlib] base material ("..base..") is not a registered node.")
             end
@@ -26,5 +26,4 @@ craftlib.register_craft = function (def) {
     } else {
         core.log("warn", "[craftlib] Registered craft is missing a base material: "..dump(def))
     }
-
 }

@@ -1,6 +1,6 @@
 craftlib = {
     path = core.get_modpath(core.get_current_modname()),
-    crafts = {}
+    registered_crafts = {}
 }
 
 dofile(craftlib.path .. "/api.lua")
@@ -8,13 +8,13 @@ dofile(craftlib.path .. "/crafts.lua")
 
 core.register_on_mods_loaded(function()
     for name, def in pairs(core.registered_nodes) do
-        if craftlib.crafts[name] then
+        if craftlib.registered_crafts[name] then
             core.override_item(name, {
                 on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
                     local item = string.match(itemstack, "^([^ ]+)")
                     if clicker:get_player_control().sneak then
                         -- crafting activated
-                        for _, craft in ipairs(craftlib.crafts[name]) do
+                        for _, craft in ipairs(craftlib.registered_crafts[name]) do
                             local item_matches = false
                             for _, input in ipairs(craft.input) do
                                 if string.match(input, "^group:") then
@@ -33,6 +33,9 @@ core.register_on_mods_loaded(function()
                         end
                     end
                     return def.on_rightclick(pos, node, clicker, itemstack, pointed_thing)
+                end,
+                on_dig = function(pos, node, digger)
+
                 end
             })
         else
