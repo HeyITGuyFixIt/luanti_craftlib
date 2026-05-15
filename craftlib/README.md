@@ -26,6 +26,8 @@ You can set the `tool` to any item, tool, or group to specify what tool the play
 
 You can set the `output` to a list of items that are created from this craft. Instead of replacements, like in craft recipes, specify the output of a replacement here. So if the `input` includes a bucket of water, add an empty bucket to the `output`, alongside the regular output of the craft.
 
+Using a group in the output allows for a more dynamic craft. The library matches the input items to potential output items with the output group. If there is a match, it uses it. So if the input is "group:tree" and the output is "group:slab", and the player inputs "default:pine_tree", it will match it to "stairs:slab_pine_wood", based off a registered association between tree and wood.
+
 ### Mixing Crafts
 
 ```lua
@@ -97,3 +99,10 @@ craftlib.register_craft({
     tool = "anvil:hammer"
 })
 ```
+
+### Other Functions
+
+* `craftlib.is_crafting_active(pos)`: Checks if the node at `pos` has a metadata key specifying if it is setup to craft or not. Returns true or false.
+* `craftlib.toggle_crafting(pos, node, clicker, itemstack, pointed_thing)`: Used in `on_rightclick` in a node definition to prepare a base for crafting or to cancel a craft. It sets up the node with an inventory to store input items and takes one item from the player's itemstack. If toggled off, it removes the inventory and drops the items. It is only ran if the node is a base in any registered craft.
+* `craftlib.attempt_craft(pos, node, digger)`: Used in `on_dig` in a node definition to attempt a craft with the provided inputs. This is applied to all node definitions and is only ran after a successful check from `craftlib.is_crafting_active`.
+* `craftlib.register_association(input_type, output_type)`: Register types of inputs to types of outputs. For example, "tree" to "wood", so that "default:tree" will be associated with "stairs:slab_wood" and "default:pine_tree" will be associated with "stairs:slab_pine_wood".

@@ -36,6 +36,48 @@ craftlib.register_craft = function (def)
     end
 end
 
-craftlib.is_crafting_activated = function(pos, node, digger)
-    --
+craftlib.is_crafting_active = function(pos)
+    local base = core.get_node(pos).name
+    if craftlib.bases[base] then
+        local meta = core.get_meta(pos)
+        if meta:get_int(craftlib.meta_keys.active) == 1 then
+            return true
+        end
+    end
+    return false
+end
+
+craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing)
+    local base = core.get_node(pos).name
+    if craftlib.bases[base] then
+        local meta = core.get_meta(pos)
+        local inv = meta:get_inventory()
+        if craftlib.is_crafting_active(pos) then
+            meta:set_int(craftlib.meta_keys.active, 0)
+            --  deletes inventory list, need to test to see what happens to contents, hopefully they just drop
+            inv:set_size(craftlib.meta_keys.inv, 0)
+        else
+            meta:set_int(craftlib.meta_keys.active, 1)
+            -- might change these values later
+            inv:set_size(craftlib.meta_keys.inv, 9)
+            inv:set_width(craftlib.meta_keys.inv, 3)
+            if itemstack:is_empty() == false then
+                local taken = itemstack:take_item(1)
+                inv:add_item(craftlib.meta_keys.inv, taken)
+            end
+        end
+    end
+end
+
+craftlib.attempt_craft = function(pos, node, digger)
+    local base = core.get_node(pos).name
+    local recipes_i = craftlib.bases[base]
+    local meta = core.get_meta(pos)
+    local inv = meta:get_inventory()
+    -- ...
+    craftlib.toggle_crafting(pos, node, digger)
+end
+
+craftlib.register_association = function(input_type, output_type)
+
 end

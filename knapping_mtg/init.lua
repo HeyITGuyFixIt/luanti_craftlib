@@ -1,4 +1,5 @@
 knapping_mtg = {
+    path = core.get_modpath(core.get_current_modname()),
     tools = {
         pick = {
             title = 'Pickaxe',

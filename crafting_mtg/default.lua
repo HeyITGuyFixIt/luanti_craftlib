@@ -1,24 +1,25 @@
-local axe_bases = {"group:soil", "group:stone"}
-
+-- craft slabs from tree trunks
 craftlib.register_craft({
     type = "craft",
-    base = axe_bases,
+    base = crafting_mtg.tool_bases.axe,
     input = {"group:tree"},
     tool = "group:axe",
     output = "group:slab 2"
 })
 
+-- craft wood planks from slabs
 craftlib.register_craft({
     type = "craft",
-    base = axe_bases,
+    base = crafting_mtg.tool_bases.axe,
     input = {"group:slab"},
     tool = "group:axe",
     output = "group:wood 2"
 })
 
+-- craft sticks from wood planks
 craftlib.register_craft({
     type = "craft",
-    base = axe_bases,
+    base = crafting_mtg.tool_bases.axe,
     input = {"group:wood"},
     tool = "group:axe",
     output = "group:stick 4"

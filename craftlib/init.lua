@@ -1,5 +1,9 @@
 craftlib = {
     path = core.get_modpath(core.get_current_modname()),
+    meta_keys = {
+        active = "craftlib:crafting_activated",
+        inv = "craftlib:inventory"
+    },
     registered_crafts = {},
     bases = {},
     inputs = {},
@@ -8,7 +12,6 @@ craftlib = {
 }
 
 dofile(craftlib.path .. "/api.lua")
-dofile(craftlib.path .. "/crafts.lua")
 
 local organize_recipes = function(key)
 
@@ -67,16 +70,32 @@ core.register_on_mods_loaded(function()
             core.override_item(name, {
                 on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
                     local item = string.match(itemstack, "^([^ ]+)")
-                    if clicker:get_player_control().sneak and craftlib.bases(pos) then
-                        -- crafting activated
-                        craftlib.activate_crafting(pos, node, clicker, itemstack, pointed_thing)
+                    if craftlib.bases[core.get_node(pos).name] then
+                        if clicker:get_player_control().sneak then
+                            -- if crafting is inactive, activate and create inventory
+                            -- if crafting is active, deactivate and drop inventory
+                            craftlib.toggle_crafting(pos, node, clicker, itemstack, pointed_thing)
+                            return itemstack
+                        else
+                            -- take player itemstack and add to inventory
+                            -- if empty hand, remove last item from inventory
+                            if itemstack:is_empty() == false then
+                                local meta = core.get_meta(pos)
+                                local inv = meta:get_inventory()
+                                local taken = itemstack:take_item(1)
+                                inv:add_item(craftlib.meta_keys.inv, taken)
+                                return itemstack
+                            end
+                        end
                     end
                     if old_on_rightclick then
                         return old_on_rightclick(pos, node, clicker, itemstack, pointed_thing)
                     end
                 end,
                 on_dig = function(pos, node, digger)
-                    if craftlib.is_crafting_activated(pos, node, digger) then
+                    if craftlib.is_crafting_active(pos) then
+                        craftlib.attempt_craft(pos, node, digger)
+                        return false
                     end
                     if old_on_dig then
                         return old_on_dig(pos, node, digger)
