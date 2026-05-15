@@ -1,0 +1,2 @@
+# Clear craft recipes registered with core.register_craft
+craftlib_clear_old_crafts (Clear Old Crafts) bool true

@@ -14,8 +14,8 @@ craftlib.register_craft({
     type = "craft",
     base = crafting_mtg.tool_bases.axe,
     input = {"group:slab 2"},
-    tool = "group:axe",
-    output = "crafting_mtg:crafttable"
+    tool = {"group:axe"},
+    output = {"crafting_mtg:crafttable"}
 })
 
-dofile(craftlib.path .. "/default.lua")
+dofile(crafting_mtg.path .. "/default.lua")
