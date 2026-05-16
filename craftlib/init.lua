@@ -96,7 +96,7 @@ core.register_on_mods_loaded(function()
                     local old_on_rightclick = def.on_rightclick
                     local old_on_dig = def.on_dig
                     core.override_item(name, {
-                        -- on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+                        on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
                         --     -- local item = string.match(itemstack:get_name(), "^([^ ]+)")
                         --     -- core.chat_send_player("singleplayer", "Rightclicked " .. core.get_node(pos).name)
                         --     -- core.chat_send_player("singleplayer", dump(craftlib.bases[core.get_node(pos).name]))
@@ -110,30 +110,31 @@ core.register_on_mods_loaded(function()
                         --             -- if crafting is active, deactivate and drop inventory
                         --             craftlib.toggle_crafting(pos, node, clicker, itemstack, pointed_thing)
                         --             return itemstack
-                        --         elseif craftlib.is_crafting_active(pos) then -- take player itemstack and add to inventory
-                        --             core.chat_send_player("singleplayer", "Crafting is active on node")
-                        --             -- if empty hand, remove last item from inventory
-                        --             if itemstack:is_empty() == false then
-                        --                 local meta = core.get_meta(pos)
-                        --                 local inv = meta:get_inventory()
-                        --                 local taken = itemstack:take_item(1)
+                                -- else
+								if craftlib.is_crafting_active(pos) then -- take player itemstack and add to inventory
+                                    core.chat_send_player("singleplayer", "Crafting is active on node")
+                                    -- if empty hand, remove last item from inventory
+                                    if itemstack:is_empty() == false then
+                                        local meta = core.get_meta(pos)
+                                        local inv = meta:get_inventory()
+                                        local taken = itemstack:take_item(1)
                                     
-                        --                 inv:add_item(craftlib.meta_keys.inv, taken)
-                        --                 return itemstack
-                        --             end
-                        --         else
-                        --             core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
-                        --         end
+                                        inv:add_item(craftlib.meta_keys.inv, taken)
+                                        return itemstack
+                                    end
+                                else
+                                    core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
+                                end
                         --     end
-                        --     if old_on_rightclick then
-                        --         core.chat_send_player("singleplayer", "Running old on_rightclick")
-                        --         return old_on_rightclick(pos, node, clicker, itemstack, pointed_thing)
-                        --     else
-                        --         core.chat_send_player("singleplayer", "Default on_rightclick behavior")
-                        --         local new_stack, _ = core.item_place_node(itemstack, clicker, pointed_thing)
-                        --         return new_stack
-                        --     end
-                        -- end,
+                            if old_on_rightclick then
+                                core.chat_send_player("singleplayer", "Running old on_rightclick")
+                                return old_on_rightclick(pos, node, clicker, itemstack, pointed_thing)
+                            else
+                                core.chat_send_player("singleplayer", "Default on_rightclick behavior")
+                                local new_stack, _ = core.item_place_node(itemstack, clicker, pointed_thing)
+                                return new_stack
+                            end
+                        end,
                         on_dig = function(pos, node, digger)
                             if craftlib.is_crafting_active(pos) then
                                 craftlib.attempt_craft(pos, node, digger)
@@ -174,7 +175,7 @@ controls.register_on_press(function(player, key)
 		--Get the tool's definition, to check its digparams and range
 		local def = tool:get_definition()
 		--Create a ray between the player's eyes and where they're looking, limited by their tool's range
-		local ray = Raycast(pos, vector.add(pos, vector.multiply(player:get_look_dir(), def.range or minetest.registered_items[""].range or 4)))
+		local ray = Raycast(pos, vector.add(pos, vector.multiply(player:get_look_dir(), def.range or core.registered_items[""].range or 4)))
 
 		--Store a pointed_thing based on the first walkable node found
 		local pointed_thing = nil
@@ -191,27 +192,27 @@ controls.register_on_press(function(player, key)
         -- core.chat_send_player("singleplayer", "Found node in list of bases")
         local controls = placer:get_player_control()
         -- core.log("action", "Player control table: "..dump(controls))
-        if controls.sneak then
-            core.remove_node(pos)
+        -- if controls.sneak then
+            -- core.remove_node(pos)
             core.chat_send_player("singleplayer", "Toggling crafting on node")
             -- if crafting is inactive, activate and create inventory
             -- if crafting is active, deactivate and drop inventory
             craftlib.toggle_crafting(under, newnode, placer, itemstack, pointed_thing)
-            return true
-        elseif craftlib.is_crafting_active(under) then -- take player itemstack and add to inventory
-            core.chat_send_player("singleplayer", "Crafting is active on node")
-            -- if empty hand, remove last item from inventory
-            if itemstack:is_empty() == false then
-                core.remove_node(pos)
-                local meta = core.get_meta(under)
-                local inv = meta:get_inventory()
-                local taken = itemstack:take_item(1)
+            -- return true
+        -- elseif craftlib.is_crafting_active(under) then -- take player itemstack and add to inventory
+        --     core.chat_send_player("singleplayer", "Crafting is active on node")
+        --     -- if empty hand, remove last item from inventory
+        --     if itemstack:is_empty() == false then
+        --         core.remove_node(pos)
+        --         local meta = core.get_meta(under)
+        --         local inv = meta:get_inventory()
+        --         local taken = itemstack:take_item(1)
             
-                inv:add_item(craftlib.meta_keys.inv, taken)
-                return true
-            end
-        else
-            core.chat_send_player("singleplayer", "Either player is not pressing sneak or crafting isn't active")
+        --         inv:add_item(craftlib.meta_keys.inv, taken)
+        --         return true
+        --     end
+        -- else
+        --     core.chat_send_player("singleplayer", "Either player is not pressing sneak or crafting isn't active")
         end
 			end
     end
