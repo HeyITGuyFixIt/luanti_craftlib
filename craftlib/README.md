@@ -28,6 +28,15 @@ You can set the `output` to a list of items that are created from this craft. In
 
 Using a group in the output allows for a more dynamic craft. The library matches the input items to potential output items with the output group. If there is a match, it uses it. So if the input is "group:tree" and the output is "group:slab", and the player inputs "default:pine_tree", it will match it to "stairs:slab_pine_wood", based off a registered association between tree and wood.
 
+Due to the dependency on the mod `group_any`, you can use the following groups to target items at a high level:
+
+* `group:any`: all registered items (except for entities)
+* `group:node`: all nodes from `core.registered_nodes`.
+* `group:craftitem`: all craft items from `core.registered_craftitems`.
+* `group:tool`: all tools from `core.registered_tools`.
+
+An example of using these groups would be to use `group:node` as a base to target all nodes as a base for the craft, or `group:tool` as a tool to target all tools as a usable tool for the craft.
+
 ### Mixing Crafts
 
 ```lua
