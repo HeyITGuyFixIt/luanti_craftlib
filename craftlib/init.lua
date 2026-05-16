@@ -168,6 +168,25 @@ controls.register_on_press(function(player, key)
   if not (key == "place" and ctrl.sneak) then
     return
   end
+		--Get the position of the player's eyes, to determine pointed_thing
+		local pos = player:get_pos()
+		pos.y = pos.y + player:get_properties().eye_height
+		--Get the tool's definition, to check its digparams and range
+		local def = tool:get_definition()
+		--Create a ray between the player's eyes and where they're looking, limited by their tool's range
+		local ray = Raycast(pos, vector.add(pos, vector.multiply(player:get_look_dir(), def.range or minetest.registered_items[""].range or 4)))
+
+		--Store a pointed_thing based on the first walkable node found
+		local pointed_thing = nil
+		for pt in ray do
+			if pt.type == "node" then
+				pointed_thing = pt
+				break
+			end
+		end
+
+		--If a pointed thing was found...
+		if pointed_thing then
     if craftlib.bases[core.get_node(under).name] ~= nil then
         -- core.chat_send_player("singleplayer", "Found node in list of bases")
         local controls = placer:get_player_control()
@@ -194,6 +213,7 @@ controls.register_on_press(function(player, key)
         else
             core.chat_send_player("singleplayer", "Either player is not pressing sneak or crafting isn't active")
         end
+			end
     end
 end)
 
