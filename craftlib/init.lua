@@ -163,9 +163,11 @@ core.register_on_joinplayer(function(player)
     inv:set_size("craft", 4)
     inv:set_width("craft", 2)
 end)
-
-core.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
-    local under = {x=pos.x,y=pos.y-1,z=pos.z}
+controls.register_on_press(function(player, key)
+  local ctrl = player:get_player_control()
+  if not (key == "place" and ctrl.sneak) then
+    return
+  end
     if craftlib.bases[core.get_node(under).name] ~= nil then
         -- core.chat_send_player("singleplayer", "Found node in list of bases")
         local controls = placer:get_player_control()
