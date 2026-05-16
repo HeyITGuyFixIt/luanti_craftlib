@@ -33,7 +33,7 @@ craftlib.register_craft = function (def)
         --     end
         -- end
     else
-        core.log("warn", "[craftlib] Registered craft is missing a base material: "..dump(def))
+        core.log("warn", "[craftlib] Failed to register craft. Missing a base material: "..dump(def))
     end
 end
 
@@ -55,7 +55,16 @@ craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing
         local inv = meta:get_inventory()
         if craftlib.is_crafting_active(pos) then
             meta:set_int(craftlib.meta_keys.active, 0)
-            --  deletes inventory list, need to test to see what happens to contents, hopefully they just drop
+            if inv:is_empty(craftlib.meta_keys.inv) == false then
+                -- Drop items from inv list
+                local list = inv:get_list(craftlib.meta_keys.inv)
+                if list ~= nil then
+                    for _, item in ipairs(list) do
+                        core.add_item({x = pos.x + (((math.random(1, 70)/100)-0.35)), y = pos.y+1, z = pos.z + (((math.random(1, 70)/100)-0.35))}, item)
+                    end
+                end
+                inv:set_list(craftlib.meta_keys.inv, {})
+            end
             inv:set_size(craftlib.meta_keys.inv, 0)
         else
             meta:set_int(craftlib.meta_keys.active, 1)
