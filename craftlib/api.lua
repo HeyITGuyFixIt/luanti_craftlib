@@ -79,6 +79,32 @@ craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing
     end
 end
 
+local isEqualTable = function(t1, t2)
+    for k, v in pairs(t1) do
+        if type(v) == "table" then
+            if not isEqualTable(v, t2[k]) then
+               return false
+            end
+         else
+            if v ~= t2[k] then
+               return false
+            end
+         end
+      end
+    for k, v in pairs(t2) do
+        if type(v) == "table" then
+            if not isEqualTable(v, t1[k]) then
+               return false
+            end
+         else
+            if v ~= t1[k] then
+               return false
+            end
+         end
+      end
+    return true
+end
+
 craftlib.attempt_craft = function(pos, node, digger)
     local base = core.get_node(pos).name
     local recipes_i = craftlib.bases[base]
