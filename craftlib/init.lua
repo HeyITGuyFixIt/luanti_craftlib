@@ -122,8 +122,8 @@ core.register_on_mods_loaded(function()
                                         inv:add_item(craftlib.meta_keys.inv, taken)
                                         return itemstack
                                     end
-                                else
-                                    core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
+                                -- else
+                                    -- core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
                                 end
                         --     end
                             if old_on_rightclick then
@@ -188,7 +188,9 @@ controls.register_on_press(function(player, key)
 
 		--If a pointed thing was found...
 		if pointed_thing then
-    if craftlib.bases[core.get_node(under).name] ~= nil then
+			local under = pointed_thing.under
+			local node = core.get_node(under)
+    if craftlib.bases[node.name] ~= nil then
         -- core.chat_send_player("singleplayer", "Found node in list of bases")
         local controls = placer:get_player_control()
         -- core.log("action", "Player control table: "..dump(controls))
@@ -197,7 +199,7 @@ controls.register_on_press(function(player, key)
             core.chat_send_player("singleplayer", "Toggling crafting on node")
             -- if crafting is inactive, activate and create inventory
             -- if crafting is active, deactivate and drop inventory
-            craftlib.toggle_crafting(under, newnode, placer, itemstack, pointed_thing)
+            craftlib.toggle_crafting(under, node, player, player:get_wielded_item(), pointed_thing)
             -- return true
         -- elseif craftlib.is_crafting_active(under) then -- take player itemstack and add to inventory
         --     core.chat_send_player("singleplayer", "Crafting is active on node")
