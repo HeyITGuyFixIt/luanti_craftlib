@@ -79,7 +79,7 @@ craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing
     end
 end
 
-local isEqualTable = function(t1, t2)
+local function isEqualTable(t1, t2)
     for k, v in pairs(t1) do
         if type(v) == "table" then
             if not isEqualTable(v, t2[k]) then

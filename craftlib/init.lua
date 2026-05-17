@@ -165,58 +165,58 @@ core.register_on_joinplayer(function(player)
     inv:set_width("craft", 2)
 end)
 controls.register_on_press(function(player, key)
-  local ctrl = player:get_player_control()
-  if not (key == "place" and ctrl.sneak) then
-    return
-  end
-		--Get the position of the player's eyes, to determine pointed_thing
-		local pos = player:get_pos()
-		pos.y = pos.y + player:get_properties().eye_height
-		--Get the tool's definition, to check its digparams and range
-		local def = tool:get_definition()
-		--Create a ray between the player's eyes and where they're looking, limited by their tool's range
-		local ray = Raycast(pos, vector.add(pos, vector.multiply(player:get_look_dir(), def.range or core.registered_items[""].range or 4)))
+    local ctrl = player:get_player_control()
+    if not (key == "place" and ctrl.sneak) then
+        return
+    end
+    local tool = player:get_wielded_item()
+    --Get the position of the player's eyes, to determine pointed_thing
+    local pos = player:get_pos()
+    pos.y = pos.y + player:get_properties().eye_height
+    --Get the tool's definition, to check its digparams and range
+    local def = tool:get_definition()
+    --Create a ray between the player's eyes and where they're looking, limited by their tool's range
+    local ray = Raycast(pos, vector.add(pos, vector.multiply(player:get_look_dir(), def.range or core.registered_items[""].range or 4)))
 
-		--Store a pointed_thing based on the first walkable node found
-		local pointed_thing = nil
-		for pt in ray do
-			if pt.type == "node" then
-				pointed_thing = pt
-				break
-			end
-		end
-
-		--If a pointed thing was found...
-		if pointed_thing then
-			local under = pointed_thing.under
-			local node = core.get_node(under)
-    if craftlib.bases[node.name] ~= nil then
-        -- core.chat_send_player("singleplayer", "Found node in list of bases")
-        local controls = placer:get_player_control()
-        -- core.log("action", "Player control table: "..dump(controls))
-        -- if controls.sneak then
-            -- core.remove_node(pos)
-            core.chat_send_player("singleplayer", "Toggling crafting on node")
-            -- if crafting is inactive, activate and create inventory
-            -- if crafting is active, deactivate and drop inventory
-            craftlib.toggle_crafting(under, node, player, player:get_wielded_item(), pointed_thing)
-            -- return true
-        -- elseif craftlib.is_crafting_active(under) then -- take player itemstack and add to inventory
-        --     core.chat_send_player("singleplayer", "Crafting is active on node")
-        --     -- if empty hand, remove last item from inventory
-        --     if itemstack:is_empty() == false then
-        --         core.remove_node(pos)
-        --         local meta = core.get_meta(under)
-        --         local inv = meta:get_inventory()
-        --         local taken = itemstack:take_item(1)
-            
-        --         inv:add_item(craftlib.meta_keys.inv, taken)
-        --         return true
-        --     end
-        -- else
-        --     core.chat_send_player("singleplayer", "Either player is not pressing sneak or crafting isn't active")
+    --Store a pointed_thing based on the first walkable node found
+    local pointed_thing = nil
+    for pt in ray do
+        if pt.type == "node" then
+            pointed_thing = pt
+            break
         end
-			end
+    end
+
+    --If a pointed thing was found...
+    if pointed_thing then
+        local under = pointed_thing.under
+        local node = core.get_node(under)
+        if craftlib.bases[node.name] ~= nil then
+            -- core.chat_send_player("singleplayer", "Found node in list of bases")
+            local controls = player:get_player_control()
+            -- core.log("action", "Player control table: "..dump(controls))
+            -- if controls.sneak then
+                -- core.remove_node(pos)
+                core.chat_send_player("singleplayer", "Toggling crafting on node")
+                -- if crafting is inactive, activate and create inventory
+                -- if crafting is active, deactivate and drop inventory
+                craftlib.toggle_crafting(under, node, player, player:get_wielded_item(), pointed_thing)
+                -- return true
+            -- elseif craftlib.is_crafting_active(under) then -- take player itemstack and add to inventory
+            --     core.chat_send_player("singleplayer", "Crafting is active on node")
+            --     -- if empty hand, remove last item from inventory
+            --     if itemstack:is_empty() == false then
+            --         core.remove_node(pos)
+            --         local meta = core.get_meta(under)
+            --         local inv = meta:get_inventory()
+            --         local taken = itemstack:take_item(1)
+                
+            --         inv:add_item(craftlib.meta_keys.inv, taken)
+            --         return true
+            --     end
+            -- else
+            --     core.chat_send_player("singleplayer", "Either player is not pressing sneak or crafting isn't active")
+        end
     end
 end)
 
