@@ -11,7 +11,7 @@ craftlib.register_craft({
     type = "craft",
     base = {"group:soil"},
     input = {"group:tree"},
-    tool = "group:axe",
+    tool = {"group:axe"},
     output = {"group:slab 2"}
 })
 ```
@@ -22,7 +22,7 @@ You can set the `base` to a list of any node or group that can be crafted on. Fo
 
 You can set the `input` to a list of any item, node, or group that the player can craft with. This follows the same logic as a shapeless recipe. The player must sneak and place in the same spot to trigger this.
 
-You can set the `tool` to any item, tool, or group to specify what tool the player crafts with. The player can dig with this tool to trigger this action. If the tool is an item, it is consumed. If it is a tool, it receives damage based on its `tool_capabilities`.
+You can set the `tool` to any item, tool, or group to specify what tool the player crafts with. The player can dig with this tool to trigger this action. If the tool is an item, it is consumed. If it is a tool, it receives damage based on its `tool_capabilities`. To register a "hand craft", you can set the tool to an empty string (`tool = {""}`); this applies to the other types of crafts below.
 
 You can set the `output` to a list of items that are created from this craft. Instead of replacements, like in craft recipes, specify the output of a replacement here. So if the `input` includes a bucket of water, add an empty bucket to the `output`, alongside the regular output of the craft.
 
@@ -44,7 +44,7 @@ craftlib.register_craft({
     type = "mix",
     base = {"cooking:mortar"},
     input = {"farming:wheat 4"},
-    tool = "group:stick",
+    tool = {"group:stick"},
     output = {"farming:flour"}
 })
 ```
@@ -105,7 +105,7 @@ craftlib.register_craft({
     type = "toolrepair",
     base = {"anvil:anvil"},
     input = {"group:repairable_tool"},
-    tool = "anvil:hammer"
+    tool = {"anvil:hammer"}
 })
 ```
 
@@ -114,4 +114,6 @@ craftlib.register_craft({
 * `craftlib.is_crafting_active(pos)`: Checks if the node at `pos` has a metadata key specifying if it is setup to craft or not. Returns true or false.
 * `craftlib.toggle_crafting(pos, node, clicker, itemstack, pointed_thing)`: Used in `on_rightclick` in a node definition to prepare a base for crafting or to cancel a craft. It sets up the node with an inventory to store input items and takes one item from the player's itemstack. If toggled off, it removes the inventory and drops the items. It is only ran if the node is a base in any registered craft.
 * `craftlib.attempt_craft(pos, node, digger)`: Used in `on_dig` in a node definition to attempt a craft with the provided inputs. This is applied to all node definitions and is only ran after a successful check from `craftlib.is_crafting_active`.
-* `craftlib.register_association(input_type, output_type)`: Register types of inputs to types of outputs. For example, "tree" to "wood", so that "default:tree" will be associated with "stairs:slab_wood" and "default:pine_tree" will be associated with "stairs:slab_pine_wood".
+* `craftlib.get_output(recipe, provided)`: Returns an itemstring for the output of a recipe using the provided items.
+* `craftlib.register_association(input_type, output_type)`: Register types of inputs to types of outputs. For example, "tree" to "wood", so that "default:tree" will be associated with "stairs:slab_wood" and "default:pine_tree" will be associated with "stairs:slab_pine_wood". Expect both parameters to be passed to `string.match()`.
+* `craftlib.register_replacement(input, replacement)`: Register replacements. This checks for groups or item names in the input string, but expects item names in the replacement list.

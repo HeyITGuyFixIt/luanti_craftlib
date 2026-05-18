@@ -10,32 +10,26 @@ craftlib.register_craft = function (def)
     -- node, item, tool, and group are strings, optionally followed by a quantity
     if def.base ~= nil and #def.base ~= 0 then
         table.insert(craftlib.registered_crafts, def)
-        -- for _, base in ipairs(def.base) do
-        --     if string.match(base, "^group:") then -- base is a group
-        --         local group = string.match(base, "^group:([^ ]+)")
-        --         for node, node_def in pairs(core.registered_nodes) do
-        --             if node_def.groups[group] ~= nil then
-        --                 if craftlib.registered_crafts[node] == nil then
-        --                     craftlib.registered_crafts[node] = {}
-        --                 end
-        --                 table.insert(craftlib.registered_crafts[node], def)
-        --             end
-        --         end
-        --     else -- base is a node
-        --         if core.registered_nodes[base] ~= nil then
-        --             if craftlib.registered_crafts[base] == nil then
-        --                 craftlib.registered_crafts[base] = {}
-        --             end
-        --             table.insert(craftlib.registered_crafts[base], def)
-        --         else
-        --             core.log("warn", "[craftlib] base material ("..base..") is not a registered node.")
-        --         end
-        --     end
-        -- end
     else
         core.log("warn", "[craftlib] Failed to register craft. Missing a base material: "..dump(def))
     end
 end
+
+
+craftlib.register_association = function(input_type, output_type)
+    if craftlib.registered_associations[input_type] == nil then
+        craftlib.registered_associations[input_type] = {}
+    end
+    table.insert(craftlib.registered_associations[input_type], output_type)
+end
+
+craftlib.register_replacement = function(input, replacement)
+    if craftlib.registered_associations[input] == nil then
+        craftlib.registered_associations[input] = {}
+    end
+    table.insert(craftlib.registered_associations[input], replacement)
+end
+
 
 craftlib.is_crafting_active = function(pos)
     local base = core.get_node(pos).name
@@ -110,10 +104,69 @@ craftlib.attempt_craft = function(pos, node, digger)
     local recipes_i = craftlib.bases[base]
     local meta = core.get_meta(pos)
     local inv = meta:get_inventory()
+    local list = inv:get_list(craftlib.meta_keys.inv)
+    local plain_list = {}
+    local recipe_i = nil
+    for _, stack in ipairs(list) do
+        table.insert(plain_list, stack:to_string())
+    end
+    for _, i in ipairs(recipes_i) do
+        if isEqualTable(craftlib.registered_crafts[i].input, plain_list) then
+            recipe_i = i
+            break
+        end
+    end
+    local recipe = craftlib.registered_crafts[recipe_i]
+    local wielded = digger:get_wielded_item()
+    local toolname = wielded:get_name()
+    local is_right_tool = false
+    -- for _, tool in ipairs(recipe.tool) do
+    if craftlib.tools[toolname] then
+        for _, i in ipairs(craftlib.tools[toolname]) do
+            if i == recipe_i then
+                is_right_tool = true
+                break
+            end
+        end
+    end
+    if is_right_tool then
+        local output = craftlib.get_output(recipe, list, digger)
+        for _, stack in ipairs(list) do
+            inv:remove_item(craftlib.meta_keys.inv, stack)
+        end
+        for _, item in output do
+            inv:add_item(craftlib.meta_keys.inv, ItemStack(item))
+        end
+    end
+    if recipe.type == "toolrepair" and  then
+        return
+    else
     -- ...
-    craftlib.toggle_crafting(pos, node, digger)
+        craftlib.toggle_crafting(pos, node, digger)
+    end
 end
 
-craftlib.register_association = function(input_type, output_type)
-
+craftlib.get_output = function(recipe, provided, player)
+    local output = {}
+    local tool = player:get_wielded_item()
+    if recipe.type == "toolrepair" then
+        for _, item in pairs(provided) do
+            local groups = core.registered_items[item:get_name()]
+            if groups.disable_repair ~= 1 and groups.not_repaired_by_anvil ~= 1 then
+                local tool_cap = wielded:get_tool_capabilities()
+                item:add_wear(-5000)
+                tool:add_wear(100)
+                player:set_wielded_item(tool)
+            end
+            table.insert(output, item)
+        end
+    else
+        -- assume type is "craft" if not anything else
+        for _, item in pairs(provided) do
+            local name = item:get_name()
+            local count = item:get_count()
+            local def = core.registered_items[name]
+        end
+    end
+    return output
 end

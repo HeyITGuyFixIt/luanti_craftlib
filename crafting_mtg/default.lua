@@ -24,3 +24,5 @@ craftlib.register_craft({
     tool = {"group:axe"},
     output = {"group:stick 4"}
 })
+
+craftlib.register_replacement("group:vessel", {"vessel:glass_bottle", "vessel:drinking_glass", "vessel:steel_bottle"})

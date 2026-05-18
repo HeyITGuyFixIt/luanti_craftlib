@@ -5,6 +5,8 @@ craftlib = {
         inv = "craftlib:inventory"
     },
     registered_crafts = {},
+    registered_associations = {},
+    registered_replacements = {},
     bases = {},
     inputs = {},
     outputs = {},
@@ -18,7 +20,7 @@ local organize_recipes = function(key)
 end
 
 core.register_on_mods_loaded(function()
-    core.log("action", "[craftlib] Registered crafts: " .. dump(craftlib.registered_crafts))
+    core.log("debug", "[craftlib] Registered crafts: " .. dump(craftlib.registered_crafts))
     local clear_crafts = false
     if core.settings:get_bool("craftlib_clear_old_crafts") then
         clear_crafts = true
@@ -31,7 +33,7 @@ core.register_on_mods_loaded(function()
     }
     local keys = { "base", "input", "tool", "output" }
     for i, recipe in ipairs(craftlib.registered_crafts) do
-        core.log("action", "[craftlib] Recipe: " .. dump(recipe))
+        core.log("debug", "[craftlib] Recipe: " .. dump(recipe))
         for _, key in ipairs(keys) do
             if recipe[key] and #recipe[key] > 0 then
                 for _, str in pairs(recipe[key]) do
@@ -47,7 +49,7 @@ core.register_on_mods_loaded(function()
                             end
                         end
                         if in_groups_yet == false then
-                            core.log("action", "[craftlib] Adding " .. group .. " to groups." .. key)
+                            core.log("debug", "[craftlib] Adding " .. group .. " to groups." .. key)
                             groups[key][group] = { i }
                         end
                     else
@@ -63,7 +65,7 @@ core.register_on_mods_loaded(function()
             end
         end
     end
-    core.log("action", "[craftlib] Groups: " .. dump(groups))
+    core.log("debug", "[craftlib] Groups: " .. dump(groups))
     local registrars = {
         "registered_nodes",
         "registered_craftitems",
@@ -95,6 +97,7 @@ core.register_on_mods_loaded(function()
                 if craftlib.bases[name] then
                     local old_on_rightclick = def.on_rightclick
                     local old_on_dig = def.on_dig
+                    local old_on_blast = def.on_blast
                     core.override_item(name, {
                         on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
                         --     -- local item = string.match(itemstack:get_name(), "^([^ ]+)")
@@ -103,7 +106,7 @@ core.register_on_mods_loaded(function()
                         --     if craftlib.bases[core.get_node(pos).name] ~= nil then
                         --         -- core.chat_send_player("singleplayer", "Found node in list of bases")
                         --         local controls = clicker:get_player_control()
-                        --         -- core.log("action", "Player control table: "..dump(controls))
+                        --         -- core.log("debug", "Player control table: "..dump(controls))
                         --         if controls.aux1 then
                         --             core.chat_send_player("singleplayer", "Toggling crafting on node")
                         --             -- if crafting is inactive, activate and create inventory
@@ -143,6 +146,35 @@ core.register_on_mods_loaded(function()
                             if old_on_dig then
                                 return old_on_dig(pos, node, digger)
                             end
+                        end,
+                        on_blast = function(pos, intensity)
+                            local drops = {}
+                            local meta = core.get_meta(pos)
+                            if craftlib.is_crafting_active(pos) then
+                                meta:set_int(craftlib.meta_keys.active, 0)
+                                if inv:is_empty(craftlib.meta_keys.inv) == false then
+                                    -- Drop items from inv list
+                                    local list = inv:get_list(craftlib.meta_keys.inv)
+                                    if list ~= nil then
+                                        for _, item in ipairs(list) do
+                                            table.insert(drops, item)
+                                        end
+                                    end
+                                    inv:set_list(craftlib.meta_keys.inv, {})
+                                end
+                                inv:set_size(craftlib.meta_keys.inv, 0)
+                            end
+                            if old_on_blast then
+                                local old_drops = old_on_blast(pos, intensity)
+                                for _, drop in ipairs(old_drops) do
+                                    table.insert(drops, drop)
+                                end
+                            else
+                                table.insert(drops, ItemStack({
+                                    name = name
+                                }))
+                            end
+                            return drops
                         end
                     })
                 else
@@ -153,10 +185,10 @@ core.register_on_mods_loaded(function()
             end
         end
     end
-    core.log("action", "[craftlib] Bases: " .. dump(craftlib.bases))
-    core.log("action", "[craftlib] Inputs: " .. dump(craftlib.inputs))
-    core.log("action", "[craftlib] Outputs: " .. dump(craftlib.outputs))
-    core.log("action", "[craftlib] Tools: " .. dump(craftlib.tools))
+    core.log("debug", "[craftlib] Bases: " .. dump(craftlib.bases))
+    core.log("debug", "[craftlib] Inputs: " .. dump(craftlib.inputs))
+    core.log("debug", "[craftlib] Outputs: " .. dump(craftlib.outputs))
+    core.log("debug", "[craftlib] Tools: " .. dump(craftlib.tools))
 end)
 
 core.register_on_joinplayer(function(player)
@@ -194,7 +226,7 @@ controls.register_on_press(function(player, key)
         if craftlib.bases[node.name] ~= nil then
             -- core.chat_send_player("singleplayer", "Found node in list of bases")
             local controls = player:get_player_control()
-            -- core.log("action", "Player control table: "..dump(controls))
+            -- core.log("debug", "Player control table: "..dump(controls))
             -- if controls.sneak then
                 -- core.remove_node(pos)
                 core.chat_send_player("singleplayer", "Toggling crafting on node")
