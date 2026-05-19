@@ -89,8 +89,9 @@ for name, def in pairs(knapping_mtg.tools) do
         })
 
         craftlib.register_recipe({
-            type = "knap",
+            type = "carve",
             base = {"default:" .. material},
+            tool = {"default:" .. material},
             output = {item_name},
             pattern = knapping.default_recipes[name],
             texture = props.texture

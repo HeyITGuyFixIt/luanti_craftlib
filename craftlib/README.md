@@ -51,52 +51,35 @@ craftlib.register_craft({
 
 Here is another type of craft that uses a container instead of a surface base. In this example, set the `base` to a list of any node or group that can contain items. An entity is created to fit inside of it and display the input. The rest of the parameters work the same as with basic crafts.
 
-### Knapping Crafts
+### Carve Craft
 
 ```lua
 craftlib.register_craft({
-    type = "knap",
-    base = {"group:stone"},
+    type = "carve",
+    base = {"group:slab group:wood"},
+    tool = { "group:chisel", "group:axe" },
     pattern = {
-        {1, 1, 0, 0, 0, 0, 0, 0},
-        {1, 1, 1, 1, 1, 0, 0, 0},
-        {0, 1, 1, 1, 1, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 1, 1, 1, 0},
         {0, 0, 1, 1, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 1, 1, 1, 0},
-        {0, 0, 0, 0, 0, 1, 1, 1},
-        {0, 0, 0, 0, 0, 0, 1, 1}
+        {0, 0, 0, 1, 1, 0, 0, 0},
+        {0, 0, 0, 1, 1, 0, 0, 0},
+        {0, 0, 1, 1, 1, 1, 0, 0},
+        {0, 1, 1, 1, 1, 1, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0}
     },
-    output = {"knapping:pick_head_stone"},
-    texture = "default_stone.png"
+    output = { "metalworking:pattern_anvil" },
+    texture = "default_wood.png"
 })
 ```
 
-This is a unique type of craft called knapping. The idea is you strike two materials together in an orderly way, and you can make toolheads from that. Due to the uniqueness of this method, it has a slightly different set of parameters.
+This is type of craft allows you to either use a tool or material to carve out a pattern. The idea is you strike two materials together in an orderly way (knapping), and you can make toolheads from that, or you can use a chisel to carve out a pattern. Due to the uniqueness of this method, it has a slightly different set of parameters.
 
-* `pattern`: This is a list of lists, each containing a series of 1s and 0s. This creates an 8x8 grid that the player has to tap to remove chunks from the input material.
+* `tool`: For knapping, you can use the same value as `base`, otherwise you can specify tools that can be used to carve out the pattern.
+
+* `pattern`: This is a list of lists, each containing a series of 1s and 0s. This creates an 8x8 grid that the player has to tap to remove chunks from the input material. 1s are kept while 0s are removed.
 
 * `texture`: This is the texture displayed on the entity while knapping. If not specified, it uses the texture of the base item.
-
-### Chisel Craft
-
-```lua
-craftlib.register_craft({
-    type = "chisel",
-    base = {"group:slab"},
-    pattern = {
-        {1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 0, 0, 1, 1, 1},
-        {1, 1, 1, 0, 0, 1, 1, 1},
-        {1, 1, 0, 0, 0, 0, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1}
-    },
-    output = { "metalworking:pattern_anvil" }
-})
-```
 
 ### Tool Repair
 

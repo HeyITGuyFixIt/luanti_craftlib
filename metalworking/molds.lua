@@ -1,5 +1,5 @@
 craftlib.register_craft({
-    type = "knap",
+    type = "carve",
     base = {"group:slab"},
     tool = { "group:chisel", "group:axe" },
     pattern = {
