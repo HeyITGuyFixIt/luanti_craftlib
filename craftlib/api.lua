@@ -30,6 +30,8 @@ craftlib.register_replacement = function(input, replacement)
     table.insert(craftlib.registered_associations[input], replacement)
 end
 
+craftlib.register_consumable = function(itemname, uses)
+end
 
 craftlib.is_crafting_active = function(pos)
     local base = core.get_node(pos).name

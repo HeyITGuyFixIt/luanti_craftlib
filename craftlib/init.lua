@@ -15,9 +15,9 @@ craftlib = {
 
 dofile(craftlib.path .. "/api.lua")
 
-local organize_recipes = function(key)
+-- local organize_recipes = function(key)
 
-end
+-- end
 
 core.register_on_mods_loaded(function()
     core.log("debug", "[craftlib] Registered crafts: " .. dump(craftlib.registered_crafts))
@@ -156,9 +156,7 @@ core.register_on_mods_loaded(function()
                                     -- Drop items from inv list
                                     local list = inv:get_list(craftlib.meta_keys.inv)
                                     if list ~= nil then
-                                        for _, item in ipairs(list) do
-                                            table.insert(drops, item)
-                                        end
+                                        table.insert_all(drops, list)
                                     end
                                     inv:set_list(craftlib.meta_keys.inv, {})
                                 end
@@ -166,9 +164,7 @@ core.register_on_mods_loaded(function()
                             end
                             if old_on_blast then
                                 local old_drops = old_on_blast(pos, intensity)
-                                for _, drop in ipairs(old_drops) do
-                                    table.insert(drops, drop)
-                                end
+                                table.insert_all(drops, old_drop)
                             else
                                 table.insert(drops, ItemStack({
                                     name = name
@@ -196,6 +192,7 @@ core.register_on_joinplayer(function(player)
     inv:set_size("craft", 4)
     inv:set_width("craft", 2)
 end)
+
 controls.register_on_press(function(player, key)
     local ctrl = player:get_player_control()
     if not (key == "place" and ctrl.sneak) then

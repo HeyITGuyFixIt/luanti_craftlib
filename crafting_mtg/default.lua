@@ -25,4 +25,13 @@ craftlib.register_craft({
     output = {"group:stick 4"}
 })
 
+-- craft torch from stick and coal
+craftlib.register_craft({
+    type = "craft",
+    base = {"group:node"},
+    input = {"group:stick", "group:coal"},
+    tool = {""},
+    output = {"default:torch"}
+})
+
 craftlib.register_replacement("group:vessel", {"vessel:glass_bottle", "vessel:drinking_glass", "vessel:steel_bottle"})

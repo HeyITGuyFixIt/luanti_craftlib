@@ -14,3 +14,7 @@ craftlib.register_craft({
     },
     output = { "metalworking:pattern_anvil" }
 })
+
+core.register_node("metalworking:pattern_anvil", {
+    name = "Metal Anvil Pattern",
+})
