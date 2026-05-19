@@ -81,16 +81,18 @@ This is type of craft allows you to either use a tool or material to carve out a
 
 * `texture`: This is the texture displayed on the entity while knapping. If not specified, it uses the texture of the base item.
 
-### Tool Repair
+### Restoring
 
 ```lua
 craftlib.register_craft({
-    type = "toolrepair",
+    type = "restore",
     base = {"anvil:anvil"},
     input = {"group:repairable_tool"},
     tool = {"anvil:hammer"}
 })
 ```
+
+This type of crafting allows you to repair a tool or refill a consumable.
 
 ### Other Functions
 
