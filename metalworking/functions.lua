@@ -18,3 +18,13 @@ function metalworking.remove_material(mod, material, tools, ingot)
         end
     end
 end
+
+metalworking.register_sand_cast = function(name, ingot)
+    craftlib.register_craft({
+        type = "craft",
+        base = {"group:sand"},
+        input = { name }
+        tool = { "group:hammer" },
+        output = { "metalworking:sand_cast_"..string.match(name, ":(.+)") }
+    })
+end

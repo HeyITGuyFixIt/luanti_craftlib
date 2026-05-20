@@ -25,6 +25,15 @@ craftlib.register_craft({
     output = {"group:stick 4"}
 })
 
+-- craft sticks from tree branches
+craftlib.register_craft({
+    type = "craft",
+    base = crafting_mtg.tool_bases.axe,
+    input = {"group:leaves"},
+    tool = {""},
+    output = {"group:stick"}
+})
+
 -- craft torch from stick and coal
 craftlib.register_craft({
     type = "craft",
