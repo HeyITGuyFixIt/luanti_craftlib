@@ -29,37 +29,38 @@ guideBooks.Common.register_guideBook("cooking:cookbook",
         }
     })
 
+for type, recipes in pairs(cooking.recipes) do
+    -- Adding a section
+    -- currently a maximum of 28 sections per index is supported, meaning a book can store 784 sections if all of the sections in the main index are masters.
+    -- (this can be circumvented by building custom directories using the 'extra' field of a page, but is not recommended)
 
--- Adding a section
--- currently a maximum of 28 sections per index is supported, meaning a book can store 784 sections if all of the sections in the main index are masters.
--- (this can be circumvented by building custom directories using the 'extra' field of a page, but is not recommended)
-
-guideBooks.Common.register_section(
-    "cooking:cookbook",         -- The name of a registered book
-    "Baking",                   -- The name to give the section, only string values supported
-    {                           -- A list of preset values (you could also put page definitions here.)
-        description = "Baking Recipes", --- The display name of the section
-        hidden = false,         --- Whether the section is visible in the main index (set to true to hide)
-        master = false,         --- Whether this section leads to an index (set to true to create a new index under this section)
-        slave = false,          --- Set to false to show in the main index, set to the name of another section to show in that index. cannot be used with master=true
-        Pages = {               --- The pages to preload into the section (use only for certain instances when required)
-            Index = {}          ---- A special page used only by the 'Main' section that loads after the cover
+    guideBooks.Common.register_section(
+        "cooking:cookbook",         -- The name of a registered book
+        type,                   -- The name to give the section, only string values supported
+        {                           -- A list of preset values (you could also put page definitions here.)
+            description = type .. " Recipes", --- The display name of the section
+            hidden = false,         --- Whether the section is visible in the main index (set to true to hide)
+            master = false,         --- Whether this section leads to an index (set to true to create a new index under this section)
+            slave = false,          --- Set to false to show in the main index, set to the name of another section to show in that index. cannot be used with master=true
+            Pages = {               --- The pages to preload into the section (use only for certain instances when required)
+                Index = {}          ---- A special page used only by the 'Main' section that loads after the cover
+            }
         }
-    }
-)
-
--- The sections 'Hidden' and 'Main' exist in any book by default
-
--- adding pages
-guideBooks.Common.register_page(
-    "cooking:cookbook",                               -- The name of a registered book
-    "Baking",                                         -- The name of a section in the book
-    1,                                                -- the page number (or name in the case of special pages such as Index)
-    {                                                 -- content definition
-        text1 = "foo bar",                            --- the text to display on the first half of the page
-        text2 = "lorem ipsum dolor sit amet",         --- the text to display on the second half of the page
-        -- extra = "background[0,0;5,8;ui_formspec_bg_tall.png;false]" --- A minetest formspec string used to add extra content to a page, such as an image
-    }
-)
+    )
+    -- The sections 'Hidden' and 'Main' exist in any book by default
+    for _, recipe in ipairs(recipes) do
+        -- adding pages
+        guideBooks.Common.register_page(
+            "cooking:cookbook",                               -- The name of a registered book
+            type,                                         -- The name of a section in the book
+            1,                                                -- the page number (or name in the case of special pages such as Index)
+            {                                                 -- content definition
+                text1 = "foo bar",                            --- the text to display on the first half of the page
+                text2 = "lorem ipsum dolor sit amet",         --- the text to display on the second half of the page
+                -- extra = "background[0,0;5,8;ui_formspec_bg_tall.png;false]" --- A minetest formspec string used to add extra content to a page, such as an image
+            }
+        )
+    end
+end
 
 -- The page 'Index' exists in the 'Main' section by default but can be overriden.

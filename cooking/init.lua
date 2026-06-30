@@ -6,10 +6,18 @@ cooking = {
 dofile(cooking.path .. "/utensils.lua")
 
 cooking.register_recipe = function(def)
+    -- def = { type = "", output = "", steps = {} }
     for index, step in ipairs(def.steps) do
-        craftlib.register(step)
-        if not cooking.recipes[def.type] then
-            cooking.recipes
+        craftlib.register_craft(step)
+    end
+    if not cooking.recipes[def.type] then
+        cooking.recipes[def.type] = {}
+    end
+    if type(def.output) == "string" then
+        cooking.recipes[def.type][def.output] = def.steps
+    else
+        for _, output in ipairs(def.output) do
+            cooking.recipes[def.type][output] = def.steps
         end
     end
 end
