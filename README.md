@@ -2,31 +2,26 @@
 
 Immersive crafting library mod for Luanti.
 
+To start crafting, hold the sneak key (e.g. shift) and use the dig control (e.g. left-click) on a node. If the node is a base in a registered recipe, this creates an inventory in the node, and items can be added to it by placing the items on the node. If you do this while holding a node, the held node is placed and an inventory is created in it instead of in the pointed node.
+
+To attempt a craft, dig the node. At this point, the craftlib mod evaluates if the tool used is in any of the base node's registered recipes, then checks if the inventory matches any of those recipes. If it matches, it performs the craft, otherwise, nothing changes.
+
 ## API
 
-### Basic Crafts
+### Common Parameters
 
-```lua
-craftlib.register_craft({
-    type = "craft",
-    base = {"group:soil"},
-    input = {"group:tree"},
-    tool = {"group:axe"},
-    output = {"group:slab 2"}
-})
-```
+These are the parameters that recipes can have. Not all are required. The ones marked with an asterisk are required for all recipes. The [carve recipe type](#carve) has additional parameters not described here.
 
-Example usage of the API to register a craft to split a tree node with an axe, outputting two wood slabs. In this example, a user would place a tree node on the dirt while sneaking, then they would dig it with an axe to result in the output of two wood slabs.
+* `type`*: Can be set to craft, mix, carve, or restore. See the [below](#recipe-types) sections for explanations of each recipe type.
+* `base`*: Can be set to a list of any node or group that can be crafted on. For example, this can be a soil or stone group to craft on the ground, or can be set to a craft table or anvil for a work surface.
+* `input`*: Can be set to a list of any item, node, or group that the player can craft with.
+* `tool`*: Can be set to any item, tool, or group to specify what tool the player crafts with. The player can dig with this tool to trigger this action. If the tool is an item, it is consumed. If it is a tool, it receives damage based on its `tool_capabilities`. To register a "hand recipe", you can set the tool to an empty string (`tool = {""}`).
+* `output`: Can be set to a list of items that are created from this recipe. Instead of replacements, like in craft recipes, specify the output of a replacement here. So if the `input` includes a bucket of water, add an empty bucket to the `output`, alongside the regular output of the craft. This is required for all crafts except for restore.
+* `base_replacement`: Can be set to a list of nodes or groups that the base node is replaced with after crafting. For example, if a mix recipe is registered with a base of `bucket:bucket_water`, it can be replaced with `bucket:bucket_empty` (if those craftitems were redefined as nodes).
 
-You can set the `base` to a list of any node or group that can be crafted on. For example, this can be a soil or stone group to craft on the ground, or can be set to a craft table or anvil for a work surface.
+### Group Usage
 
-You can set the `input` to a list of any item, node, or group that the player can craft with. This follows the same logic as a shapeless recipe. The player must sneak and place in the same spot to trigger this.
-
-You can set the `tool` to any item, tool, or group to specify what tool the player crafts with. The player can dig with this tool to trigger this action. If the tool is an item, it is consumed. If it is a tool, it receives damage based on its `tool_capabilities`. To register a "hand craft", you can set the tool to an empty string (`tool = {""}`); this applies to the other types of crafts below.
-
-You can set the `output` to a list of items that are created from this craft. Instead of replacements, like in craft recipes, specify the output of a replacement here. So if the `input` includes a bucket of water, add an empty bucket to the `output`, alongside the regular output of the craft.
-
-Using a group in the output allows for a more dynamic craft. The library matches the input items to potential output items with the output group. If there is a match, it uses it. So if the input is "group:tree" and the output is "group:slab", and the player inputs "default:pine_tree", it will match it to "stairs:slab_pine_wood", based off a registered association between tree and wood.
+Using a group in the any of the parameters allows for a more dynamic craft. The library matches the input items to potential output items with the output group. If there is a match, it uses it. So if the input is "group:tree" and the output is "group:slab", and the player inputs "default:pine_tree", it will match it to "stairs:slab_pine_wood", based off a registered association between the strings "tree" and "wood" (see [Other Functions](#other-functions) below).
 
 Due to the dependency on the mod `group_any`, you can use the following groups to target items at a high level:
 
@@ -37,7 +32,24 @@ Due to the dependency on the mod `group_any`, you can use the following groups t
 
 An example of using these groups would be to use `group:node` as a base to target all nodes as a base for the craft, or `group:tool` as a tool to target all tools as a usable tool for the craft.
 
-### Mixing Crafts
+### Recipe Types
+
+#### craft
+
+```lua
+craftlib.register_craft({
+    type = "craft",
+    base = {"group:soil"},
+    input = {"group:tree"},
+    tool = {"group:axe"},
+    output = {"group:slab 2"},
+    base_replacement = {"footprints:trail"}
+})
+```
+
+Example usage of the API to register a craft to split a tree node with an axe, outputting two wood slabs. In this example, a user would place a tree node on the dirt while sneaking, then they would dig it with an axe to result in the output of two wood slabs.
+
+#### mix
 
 ```lua
 craftlib.register_craft({
@@ -51,7 +63,7 @@ craftlib.register_craft({
 
 Here is another type of craft that uses a container instead of a surface base. In this example, set the `base` to a list of any node or group that can contain items. An entity is created to fit inside of it and display the input. The rest of the parameters work the same as with basic crafts.
 
-### Carve Craft
+#### carve
 
 ```lua
 craftlib.register_craft({
@@ -81,7 +93,7 @@ This is type of craft allows you to either use a tool or material to carve out a
 
 * `texture`: This is the texture displayed on the entity while knapping. If not specified, it uses the texture of the base item.
 
-### Restoring
+#### restore
 
 ```lua
 craftlib.register_craft({
@@ -92,7 +104,7 @@ craftlib.register_craft({
 })
 ```
 
-This type of crafting allows you to repair a tool or refill a consumable.
+This type of recipe allows you to repair a tool or refill a consumable.
 
 ### Other Functions
 

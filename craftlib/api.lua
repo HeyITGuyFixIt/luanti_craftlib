@@ -1,17 +1,18 @@
-craftlib.register_craft = function (def)
-    -- Expects def to be {
-    --      type = "craft"|"mix"|"knap"|"toolrepair"
-    --      base = list<node|group>,
-    --      input? = list<node|item|tool|group>,
-    --      tool? = tool,
-    --      pattern? = list<list<0|1>>
-    --      output? = list<node|item|tool|group>
-    -- }
+-- Expects def to be {
+--      type = "craft"|"mix"|"knap"|"toolrepair"
+--      base = list<node|group>,
+--      input? = list<node|item|tool|group>,
+--      tool? = tool,
+--      pattern? = list<list<0|1>>
+--      output? = list<node|item|tool|group>
+--      base_replacement = list<node|group>
+-- }
+craftlib.register_craft = function(def)
     -- node, item, tool, and group are strings, optionally followed by a quantity
     if def.base ~= nil and #def.base ~= 0 then
         table.insert(craftlib.registered_crafts, def)
     else
-        core.log("warn", "[craftlib] Failed to register craft. Missing a base material: "..dump(def))
+        core.log("warn", "[craftlib] Failed to register craft. Missing a base material: " .. dump(def))
     end
 end
 
@@ -47,6 +48,7 @@ end
 craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing)
     local base = core.get_node(pos).name
     if craftlib.bases[base] then
+        -- local upos = { x = pos.x, y = pos.y - 1, z = pos.z }
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
         if craftlib.is_crafting_active(pos) then
@@ -56,7 +58,9 @@ craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing
                 local list = inv:get_list(craftlib.meta_keys.inv)
                 if list ~= nil then
                     for _, item in ipairs(list) do
-                        core.add_item({x = pos.x + (((math.random(1, 70)/100)-0.35)), y = pos.y+1, z = pos.z + (((math.random(1, 70)/100)-0.35))}, item)
+                        core.add_item(
+                        { x = pos.x + (((math.random(1, 70) / 100) - 0.35)), y = pos.y, z = pos.z +
+                        (((math.random(1, 70) / 100) - 0.35)) }, item)
                     end
                 end
                 inv:set_list(craftlib.meta_keys.inv, {})
@@ -67,7 +71,7 @@ craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing
             -- might change these values later
             inv:set_size(craftlib.meta_keys.inv, 9)
             inv:set_width(craftlib.meta_keys.inv, 3)
-            if itemstack:is_empty() == false then
+            if itemstack and itemstack:is_empty() == false then
                 local taken = itemstack:take_item(1)
                 inv:add_item(craftlib.meta_keys.inv, taken)
             end
@@ -79,25 +83,25 @@ local function isEqualTable(t1, t2)
     for k, v in pairs(t1) do
         if type(v) == "table" then
             if not isEqualTable(v, t2[k]) then
-               return false
+                return false
             end
-         else
+        else
             if v ~= t2[k] then
-               return false
+                return false
             end
-         end
-      end
+        end
+    end
     for k, v in pairs(t2) do
         if type(v) == "table" then
             if not isEqualTable(v, t1[k]) then
-               return false
+                return false
             end
-         else
+        else
             if v ~= t1[k] then
-               return false
+                return false
             end
-         end
-      end
+        end
+    end
     return true
 end
 
@@ -113,37 +117,43 @@ craftlib.attempt_craft = function(pos, node, digger)
         table.insert(plain_list, stack:to_string())
     end
     for _, i in ipairs(recipes_i) do
-        if isEqualTable(craftlib.registered_crafts[i].input, plain_list) then
-            recipe_i = i
-            break
-        end
-    end
-    local recipe = craftlib.registered_crafts[recipe_i]
-    local wielded = digger:get_wielded_item()
-    local toolname = wielded:get_name()
-    local is_right_tool = false
-    -- for _, tool in ipairs(recipe.tool) do
-    if craftlib.tools[toolname] then
-        for _, i in ipairs(craftlib.tools[toolname]) do
-            if i == recipe_i then
-                is_right_tool = true
+        if craftlib.registered_crafts[i] then
+            if isEqualTable(craftlib.registered_crafts[i].input, plain_list) then
+                recipe_i = i
                 break
             end
         end
     end
-    if is_right_tool then
-        local output = craftlib.get_output(recipe, list, digger)
-        for _, stack in ipairs(list) do
-            inv:remove_item(craftlib.meta_keys.inv, stack)
+    if recipe_i ~= nil then
+        local recipe = craftlib.registered_crafts[recipe_i]
+        local wielded = digger:get_wielded_item()
+        local toolname = wielded:get_name()
+        local is_right_tool = false
+        -- for _, tool in ipairs(recipe.tool) do
+        if craftlib.tools[toolname] then
+            for _, i in ipairs(craftlib.tools[toolname]) do
+                if i == recipe_i then
+                    is_right_tool = true
+                    break
+                end
+            end
         end
-        for _, item in output do
-            inv:add_item(craftlib.meta_keys.inv, ItemStack(item))
+        if is_right_tool then
+            local output = craftlib.get_output(recipe, list, digger)
+            for _, stack in ipairs(list) do
+                inv:remove_item(craftlib.meta_keys.inv, stack)
+            end
+            for _, item in output do
+                inv:add_item(craftlib.meta_keys.inv, ItemStack(item))
+            end
         end
-    end
-    if recipe.type == "toolrepair" and  then
-        return
+        if recipe.type == "toolrepair" then
+            return
+        else
+            -- ...
+            craftlib.toggle_crafting(pos, node, digger)
+        end
     else
-    -- ...
         craftlib.toggle_crafting(pos, node, digger)
     end
 end
@@ -171,4 +181,26 @@ craftlib.get_output = function(recipe, provided, player)
         end
     end
     return output
+end
+
+craftlib.get_pointed_thing = function(player)
+    local tool = player:get_wielded_item()
+    --Get the position of the player's eyes, to determine pointed_thing
+    local pos = player:get_pos()
+    pos.y = pos.y + player:get_properties().eye_height
+    --Get the tool's definition, to check its digparams and range
+    local def = tool:get_definition()
+    --Create a ray between the player's eyes and where they're looking, limited by their tool's range
+    local ray = Raycast(pos,
+        vector.add(pos, vector.multiply(player:get_look_dir(), def.range or core.registered_items[""].range or 4)))
+
+    --Store a pointed_thing based on the first walkable node found
+    local pointed_thing = nil
+    for pt in ray do
+        if pt.type == "node" then
+            pointed_thing = pt
+            break
+        end
+    end
+    return pointed_thing
 end

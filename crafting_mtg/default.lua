@@ -43,4 +43,25 @@ craftlib.register_craft({
     output = {"default:torch"}
 })
 
+craftlib.register_craft({
+    type = "craft",
+    base = {"crafting_mtg:crafttable"},
+    input = {"group:leather", "default:paper 3", "group:string"},
+    output = {"default:book"},
+    tool = {""}
+})
+
+core.register_craftitem("crafting_mtg:paper_wet", {
+    description = "Wet Papyrus Sheet",
+    inventory_image = "default_paper.png", --needs to be collorized green
+})
+
+craftlib.register_craft({
+    type = "craft",
+    base = {"crafting_mtg:crafttable"},
+    input = {"default:papyrus 2"},
+    output = {"crafting_mtg:paper_wet"},
+    tool = {"group:hammer"}
+})
+
 craftlib.register_replacement("group:vessel", {"vessel:glass_bottle", "vessel:drinking_glass", "vessel:steel_bottle"})

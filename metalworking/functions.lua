@@ -23,7 +23,7 @@ metalworking.register_sand_cast = function(name, ingot)
     craftlib.register_craft({
         type = "craft",
         base = {"group:sand"},
-        input = { name }
+        input = { name },
         tool = { "group:hammer" },
         output = { "metalworking:sand_cast_"..string.match(name, ":(.+)") }
     })

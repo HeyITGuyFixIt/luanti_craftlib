@@ -73,7 +73,49 @@ knapping_mtg = {
                 }
             }
         }
-    }
+    },
+    default_recipes = {
+		pick = {
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 1, 1, 0, 0, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 1, 1, 1, 1, 1, 1, 1, 1 },
+			{ 1, 1, 1, 0, 0, 1, 1, 1 },
+			{ 1, 0, 0, 0, 0, 0, 0, 1 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+		},
+		axe = {
+			{ 0, 0, 1, 1, 0, 0, 0, 0 },
+			{ 0, 1, 1, 1, 1, 0, 0, 0 },
+			{ 0, 1, 1, 1, 1, 1, 0, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 1, 1, 1, 0, 1, 0, 0 },
+			{ 0, 1, 1, 1, 0, 0, 0, 0 },
+			{ 0, 0, 1, 1, 0, 0, 0, 0 },
+		},
+		shovel = {
+			{ 0, 0, 0, 1, 1, 0, 0, 0 },
+			{ 0, 0, 1, 1, 1, 1, 0, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 1, 1, 1, 1, 1, 1, 0 },
+			{ 0, 0, 1, 0, 0, 1, 0, 0 },
+		},
+		sword = {
+			{ 0, 0, 0, 0, 0, 0, 1, 1 },
+			{ 0, 0, 0, 0, 0, 1, 1, 1 },
+			{ 0, 0, 0, 0, 1, 1, 1, 0 },
+			{ 0, 0, 0, 1, 1, 1, 0, 0 },
+			{ 0, 0, 1, 1, 1, 0, 0, 0 },
+			{ 0, 1, 1, 1, 0, 0, 0, 0 },
+			{ 1, 1, 1, 0, 0, 0, 0, 0 },
+			{ 1, 1, 0, 0, 0, 0, 0, 0 },
+		},
+	}
 }
 
 if core.global_exists('stoneage') then
@@ -88,12 +130,12 @@ for name, def in pairs(knapping_mtg.tools) do
             inventory_image = material .. "_" .. name .. "_head.png",
         })
 
-        craftlib.register_recipe({
+        craftlib.register_craft({
             type = "carve",
             base = {"default:" .. material},
             tool = {"default:" .. material},
             output = {item_name},
-            pattern = knapping.default_recipes[name],
+            pattern = knapping_mtg.default_recipes[name],
             texture = props.texture
         })
 
