@@ -235,29 +235,17 @@ controls.register_on_press(function(player, key)
         if pointed_thing then
             local under = pointed_thing.under
             local node = core.get_node(under)
-            if craftlib.bases[node.name] then
+            if craftlib.bases[node.name] and craftlib.is_crafting_active(under) then
                 local pitemstack = player:get_wielded_item()
-                if craftlib.is_crafting_active(under) then
-                    core.chat_send_player("singleplayer", "Crafting is active on node")
-                    if pitemstack:is_empty() then
-                        -- if empty hand, remove last item from node inventory
-                        local meta = core.get_meta(under)
-                        local inv = meta:get_inventory()
-                        local taken = inv:take_item(1)
-
-                        pitemstack:add_item(craftlib.meta_keys.inv, taken)
-                        player:set_wielded_item(pitemstack)
-                    else
-                        -- take player itemstack and add to inventory
-                        local meta = core.get_meta(under)
-                        local inv = meta:get_inventory()
-                        local taken = pitemstack:take_item(1)
-
-                        inv:add_item(craftlib.meta_keys.inv, taken)
-                        player:set_wielded_item(pitemstack)
-                    end
-                    -- core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
+                core.chat_send_player("singleplayer", "Crafting is active on node")
+                if pitemstack:is_empty() then
+                    -- if empty hand, remove last item from node inventory
+                    craftlib.take_item(player, under)
+                else
+                    -- take player itemstack and add to inventory
+                    craftlib.add_item(player, under)
                 end
+                -- core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
             end
         end
     end

@@ -59,8 +59,12 @@ craftlib.toggle_crafting = function(pos, node, clicker, itemstack, pointed_thing
                 if list ~= nil then
                     for _, item in ipairs(list) do
                         core.add_item(
-                        { x = pos.x + (((math.random(1, 70) / 100) - 0.35)), y = pos.y, z = pos.z +
-                        (((math.random(1, 70) / 100) - 0.35)) }, item)
+                            {
+                                x = pos.x + (((math.random(1, 70) / 100) - 0.35)),
+                                y = pos.y,
+                                z = pos.z +
+                                    (((math.random(1, 70) / 100) - 0.35))
+                            }, item)
                     end
                 end
                 inv:set_list(craftlib.meta_keys.inv, {})
@@ -203,4 +207,27 @@ craftlib.get_pointed_thing = function(player)
         end
     end
     return pointed_thing
+end
+
+-- assumes crafting is active and pointed_thing is a base
+craftlib.add_item = function(player, pos)
+    local wielded = player:get_wielded_item()
+    local meta = core.get_meta(under)
+    local inv = meta:get_inventory()
+    local taken = wielded:take_item(1)
+
+    inv:add_item(craftlib.meta_keys.inv, taken)
+    player:set_wielded_item(wielded)
+end
+
+craftlib.take_item = function(player, pos)
+    local wielded = player:get_wielded_item()
+    local meta = core.get_meta(pos)
+    local inv = meta:get_inventory()
+    local itemstacks = inv:get_list(craftlib.meta_keys.inv)
+
+    local taken = inv:take_item(1)
+
+    wielded:add_item(craftlib.meta_keys.inv, taken)
+    player:set_wielded_item(wielded)
 end

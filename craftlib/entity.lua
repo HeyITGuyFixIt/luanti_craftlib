@@ -10,10 +10,9 @@ local allow_rotate = core.settings:get_bool("itemframes.allow_rotate", false)
 
 -- voxelibre/mineclonia support
 
-local mcl = core.get_modpath("mcl_sounds")
 local a = {
-	paper = mcl and "mcl_core:paper" or "default:paper",
-	glass = mcl and "mcl_core:glass" or "default:glass",
+	paper = "default:paper",
+	glass = "default:glass",
 	stick = "group:stick", stone = "group:stone"
 }
 
@@ -21,8 +20,6 @@ local sounds = nil
 
 if core.get_modpath("default") then
 	sounds = default.node_sound_defaults()
-elseif mcl then
-	sounds = mcl_sounds.node_sound_defaults()
 end
 
 -- translation support
@@ -41,7 +38,7 @@ local function del_ent(pos, self)
 		local obj = objs[n]
 
 		if obj and (not self or obj ~= self.object) and obj:get_luaentity()
-		and obj:get_luaentity().name == "itemframes:item" then
+		and obj:get_luaentity().name == "craftlib:item" then
 			obj:remove()
 		end
 	end
@@ -49,7 +46,7 @@ end
 
 -- item entity
 
-core.register_entity("itemframes:item", {
+core.register_entity("craftlib:item", {
 
 	initial_properties = {
 		hp_max = 1,
@@ -81,14 +78,14 @@ core.register_entity("itemframes:item", {
 			local def = core.registered_items[self.texture]
 			local props = {textures = {self.texture}}
 
-			if def and def._itemframe_texture and self.nodename ~= "itemframes:pedestal" then
+			if def and def._itemframe_texture and self.nodename ~= "craftlib:pedestal" then
 
 				props.textures = {def._itemframe_texture}
 				props.visual = "upright_sprite"
 				props.visual_size = {x = 0.6, y = 0.6}
 			end
 
-			if self.nodename == "itemframes:pedestal" then
+			if self.nodename == "craftlib:pedestal" then
 				props.automatic_rotate = 1
 			end
 
@@ -173,7 +170,7 @@ local function update_item(pos, ntype, node)
 
 		local raise = 6.5 / 16 -- itemframe default
 
-		if node and node.name == "itemframes:frame_invis" then
+		if node and node.name == "craftlib:frame_invis" then
 			raise = 6.5 / 14 -- stops floating effect
 		end
 
@@ -197,7 +194,7 @@ local function update_item(pos, ntype, node)
 
 	tmp.glow = def and def.light_source
 
-	local e = core.add_entity(pos, "itemframes:item")
+	local e = core.add_entity(pos, "craftlib:item")
 
 	if not e then
 		tmp = {} ; return
@@ -306,7 +303,7 @@ end
 
 -- itemframe node and recipe
 
-core.register_node("itemframes:frame",{
+core.register_node("craftlib:frame",{
 	description = S("Item frame"),
 	drawtype = "nodebox",
 	node_box = {type = "fixed", fixed = {-7/16, -7/16, 7/16, 7/16, 7/16, 0.5}},
@@ -388,7 +385,7 @@ core.register_node("itemframes:frame",{
 
 		drop_item(pos, "frame")
 
-		core.add_item(pos, {name = "itemframes:frame"})
+		core.add_item(pos, {name = "craftlib:frame"})
 
 		core.remove_node(pos)
 	end,
@@ -403,7 +400,7 @@ core.register_node("itemframes:frame",{
 
 -- invisible itemframe node and recipe
 
-core.register_node("itemframes:frame_invis",{
+core.register_node("craftlib:frame_invis",{
 	description = S("Invisible Item frame"),
 	drawtype = "nodebox",
 	node_box = {type = "fixed", fixed = {-7/16, -7/16, 7/16, 7/16, 7/16, 0.5}},
@@ -485,7 +482,7 @@ core.register_node("itemframes:frame_invis",{
 
 		drop_item(pos, "frame")
 
-		core.add_item(pos, {name = "itemframes:frame_invis"})
+		core.add_item(pos, {name = "craftlib:frame_invis"})
 
 		core.remove_node(pos)
 	end,
@@ -500,7 +497,7 @@ core.register_node("itemframes:frame_invis",{
 
 -- pedestal node and recipe
 
-core.register_node("itemframes:pedestal",{
+core.register_node("craftlib:pedestal",{
 	description = S("Pedestal"),
 	drawtype = "nodebox",
 	node_box = {
@@ -579,7 +576,7 @@ core.register_node("itemframes:pedestal",{
 
 		drop_item(pos, "pedestal")
 
-		core.add_item(pos2, {name = "itemframes:pedestal"})
+		core.add_item(pos2, {name = "craftlib:pedestal"})
 
 		core.remove_node(pos2)
 	end
@@ -590,8 +587,8 @@ core.register_node("itemframes:pedestal",{
 
 core.register_lbm({
 	label = "Restore itemframe entities",
-	name = "itemframes:restore_entities",
-	nodenames = {"itemframes:frame", "itemframes:pedestal", "itemframes:frame_invis"},
+	name = "craftlib:restore_entities",
+	nodenames = {"craftlib:frame", "craftlib:pedestal", "craftlib:frame_invis"},
 	run_at_every_load = true,
 
 	action = function(pos, node)
@@ -599,7 +596,7 @@ core.register_lbm({
 		local ypos = 0
 		local ntype = "frame"
 
-		if node.name == "itemframes:pedestal" then
+		if node.name == "craftlib:pedestal" then
 			ypos = 1
 			ntype = "pedestal"
 		end
