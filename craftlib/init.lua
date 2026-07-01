@@ -192,8 +192,8 @@ end)
 
 core.register_on_joinplayer(function(player)
     local inv = player:get_inventory()
-    inv:set_size("craft", 4)
-    inv:set_width("craft", 2)
+    inv:set_size("craft", 1)
+    inv:set_width("craft", 1)
 end)
 
 local function isHolding(player)
@@ -236,19 +236,26 @@ controls.register_on_press(function(player, key)
             local under = pointed_thing.under
             local node = core.get_node(under)
             if craftlib.bases[node.name] then
-                local itemstack = player:get_wielded_item()
-                if craftlib.is_crafting_active(under) then -- take player itemstack and add to inventory
+                local pitemstack = player:get_wielded_item()
+                if craftlib.is_crafting_active(under) then
                     core.chat_send_player("singleplayer", "Crafting is active on node")
-                    -- if empty hand, remove last item from inventory
-                    if itemstack:is_empty() == false then
+                    if pitemstack:is_empty() then
+                        -- if empty hand, remove last item from node inventory
                         local meta = core.get_meta(under)
                         local inv = meta:get_inventory()
-                        local taken = itemstack:take_item(1)
+                        local taken = inv:take_item(1)
+
+                        pitemstack:add_item(craftlib.meta_keys.inv, taken)
+                        player:set_wielded_item(pitemstack)
+                    else
+                        -- take player itemstack and add to inventory
+                        local meta = core.get_meta(under)
+                        local inv = meta:get_inventory()
+                        local taken = pitemstack:take_item(1)
 
                         inv:add_item(craftlib.meta_keys.inv, taken)
-                        player:set_wielded_item(itemstack)
+                        player:set_wielded_item(pitemstack)
                     end
-                    -- else
                     -- core.chat_send_player("singleplayer", "Either player is not pressing aux1 or crafting isn't active")
                 end
             end

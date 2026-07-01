@@ -10,9 +10,9 @@ To attempt a craft, dig the node. At this point, the craftlib mod evaluates if t
 
 ### Common Parameters
 
-These are the parameters that recipes can have. Not all are required. The ones marked with an asterisk are required for all recipes. The [carve recipe type](#carve) has additional parameters not described here.
+These are the parameters that recipes can have. Not all are required. The ones marked with an asterisk are required for all recipes. The [carve recipe type](#carve) and [heat recipe type](#heat) have additional parameters not described here.
 
-* `type`*: Can be set to craft, mix, carve, or restore. See the [below](#recipe-types) sections for explanations of each recipe type.
+* `type`*: Can be set to craft, mix, carve, heat, or restore. See the [below](#recipe-types) sections for explanations of each recipe type.
 * `base`*: Can be set to a list of any node or group that can be crafted on. For example, this can be a soil or stone group to craft on the ground, or can be set to a craft table or anvil for a work surface.
 * `input`*: Can be set to a list of any item, node, or group that the player can craft with.
 * `tool`*: Can be set to any item, tool, or group to specify what tool the player crafts with. The player can dig with this tool to trigger this action. If the tool is an item, it is consumed. If it is a tool, it receives damage based on its `tool_capabilities`. To register a "hand recipe", you can set the tool to an empty string (`tool = {""}`).
@@ -39,11 +39,11 @@ An example of using these groups would be to use `group:node` as a base to targe
 ```lua
 craftlib.register_craft({
     type = "craft",
-    base = {"group:soil"},
-    input = {"group:tree"},
-    tool = {"group:axe"},
-    output = {"group:slab 2"},
-    base_replacement = {"footprints:trail"}
+    base = { "group:soil" },
+    input = { "group:tree" },
+    tool = { "group:axe" },
+    output = { "group:slab 2" },
+    base_replacement = { "footprints:trail" }
 })
 ```
 
@@ -54,21 +54,39 @@ Example usage of the API to register a craft to split a tree node with an axe, o
 ```lua
 craftlib.register_craft({
     type = "mix",
-    base = {"cooking:mortar"},
-    input = {"farming:wheat 4"},
-    tool = {"group:stick"},
-    output = {"farming:flour"}
+    base = { "cooking:mortar" },
+    input = { "farming:wheat 4" },
+    tool = { "group:stick" },
+    output = { "farming:flour" }
 })
 ```
 
 Here is another type of craft that uses a container instead of a surface base. In this example, set the `base` to a list of any node or group that can contain items. An entity is created to fit inside of it and display the input. The rest of the parameters work the same as with basic crafts.
+
+#### heat
+
+```lua
+craftlib.register_craft({
+    type = "mix",
+    time = 15
+    base = { "default:furance" },
+    input = { "cooking:dough" },
+    output = { "farming:bread" },
+    tool = { "cooking:bread_pan" }
+    tool_in_furnace = true
+})
+```
+
+The heat type is used for cooking or melting recipes. It has an additional parameter called `time` that is equivalent to `cooktime` in `core.register_recipe()`. The base is the type of material that can consume inputs and produce outputs after the specified amount of time. The tool can be an empty string to specify the player's hand, or you can set it to a node name that can be picked up and attached to the player (via the i_have_hands mod). Anything the attached entity has in its inventory will be placed inside the base's inventory. If `tool_in_furnace` is set to true, the carried item will be placed in the base's inventory as well.
+
+For example, a `cooking:pan` can be picked up by the player, containing `cooking:cookie_dough 8` in its inventory. The player sneaks and right-clicks `cooking:pan` and picks it up, then they walk it over to an oven (e.g. `default:furnance`), and sneaks and left-clicks the oven. If `tool_in_furnace` were set to true, both the `cooking:pan` and its inventory items will be added to the oven's inventory. After the time set, the `cooking:cookie_dough 8` will be replaced with `farming:cookie 8`. When the player right-clicks the oven, the `cooking:pan` will be picked up by the player, containing `farming:cookie 8` in the pan's inventory. The player can place the pan by sneaking and right-clicking a node, placing the pan on top of the node. The player can then right-click the pan to pick up the cookies.
 
 #### carve
 
 ```lua
 craftlib.register_craft({
     type = "carve",
-    base = {"group:slab group:wood"},
+    base = { "group:slab group:wood" },
     tool = { "group:chisel", "group:axe" },
     pattern = {
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -98,9 +116,9 @@ This is type of craft allows you to either use a tool or material to carve out a
 ```lua
 craftlib.register_craft({
     type = "restore",
-    base = {"anvil:anvil"},
-    input = {"group:repairable_tool"},
-    tool = {"anvil:hammer"}
+    base = { "anvil:anvil" },
+    input = { "group:repairable_tool" },
+    tool = { "anvil:hammer" }
 })
 ```
 
