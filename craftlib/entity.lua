@@ -3,7 +3,6 @@
 -- rotation and settings
 
 local screwdriver = screwdriver or {}
-local tmp = {}
 local should_return_item = core.settings:get_bool("itemframes.return_item", false)
 local log_actions = core.settings:get_bool("itemframes.log_actions", false)
 local allow_rotate = core.settings:get_bool("itemframes.allow_rotate", false)
@@ -13,7 +12,8 @@ local allow_rotate = core.settings:get_bool("itemframes.allow_rotate", false)
 local a = {
 	paper = "default:paper",
 	glass = "default:glass",
-	stick = "group:stick", stone = "group:stone"
+	stick = "group:stick",
+	stone = "group:stone"
 }
 
 local sounds = nil
@@ -28,17 +28,15 @@ local S = core.get_translator("itemframes")
 
 -- remove entities
 
-local function del_ent(pos, self)
-
+craftlib.entity_api.del_entity = function(pos, self)
 	local pos2 = vector.round(pos)
 	local objs = core.get_objects_inside_radius(pos2, 0.5)
 
 	for n = 1, #objs do
-
 		local obj = objs[n]
 
 		if obj and (not self or obj ~= self.object) and obj:get_luaentity()
-		and obj:get_luaentity().name == "craftlib:item" then
+			and obj:get_luaentity().name == "craftlib:item" then
 			obj:remove()
 		end
 	end
@@ -51,38 +49,33 @@ core.register_entity("craftlib:item", {
 	initial_properties = {
 		hp_max = 1,
 		visual = "wielditem",
-		visual_size = {x = 0.33, y = 0.33},
-		collisionbox = {0, 0, 0, 0, 0, 0},
+		visual_size = { x = 0.33, y = 0.33 },
+		collisionbox = { 0, 0, 0, 0, 0, 0 },
 		physical = false,
-		textures = {"air"}
+		textures = { "air" }
 	},
 
 	on_activate = function(self, staticdata)
+		local pos = self.object:get_pos(); if not pos then return end
 
-		local pos = self.object:get_pos() ; if not pos then return end
-
-		del_ent(pos, self)
+		craftlib.entity_api.del_entity(pos, self)
 
 		local data = {}
 
-		if tmp.nodename and tmp.texture then
-			data = {tmp.nodename, tmp.texture, tmp.glow} ; tmp = {}
-		elseif staticdata and staticdata ~= "" then
+		if staticdata and staticdata ~= "" then
 			data = staticdata:split(";")
 		end
 
 		self.nodename, self.texture, self.glow = data[1], data[2], data[3]
 
 		if self.texture then
-
 			local def = core.registered_items[self.texture]
-			local props = {textures = {self.texture}}
+			local props = { textures = { self.texture } }
 
 			if def and def._itemframe_texture and self.nodename ~= "craftlib:pedestal" then
-
-				props.textures = {def._itemframe_texture}
+				props.textures = { def._itemframe_texture }
 				props.visual = "upright_sprite"
-				props.visual_size = {x = 0.6, y = 0.6}
+				props.visual_size = { x = 0.6, y = 0.6 }
 			end
 
 			if self.nodename == "craftlib:pedestal" then
@@ -98,9 +91,8 @@ core.register_entity("craftlib:item", {
 	end,
 
 	get_staticdata = function(self)
-
 		return (self.nodename and self.texture)
-		and (self.nodename .. ";" .. self.texture .. ";" .. (self.glow or "")) or ""
+			and (self.nodename .. ";" .. self.texture .. ";" .. (self.glow or "")) or ""
 	end,
 
 	on_blast = function(self, damage)
@@ -111,62 +103,59 @@ core.register_entity("craftlib:item", {
 -- helper table
 
 local facedir = {
-	[0] = {x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 0, nx = 12},
-	[12] = {x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 3, nx = 16},
-	[16] = {x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 1, nx = 20},
-	[20] = {x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 2, nx = 0},
+	[0] = { x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 0, nx = 12 },
+	[12] = { x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 3, nx = 16 },
+	[16] = { x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 1, nx = 20 },
+	[20] = { x = 0, y = 0, z = 1, pitch = 0, yaw = 0, roll = 2, nx = 0 },
 
-	[1] = {x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 0, nx = 5},
-	[5] = {x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 1, nx = 9},
-	[9] = {x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 3, nx = 23},
-	[23] = {x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 2, nx = 1},
+	[1] = { x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 0, nx = 5 },
+	[5] = { x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 1, nx = 9 },
+	[9] = { x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 3, nx = 23 },
+	[23] = { x = 1, y = 0, z = 0, pitch = 0, yaw = 1, roll = 2, nx = 1 },
 
-	[2] = {x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 0, nx = 14},
-	[14] = {x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 1, nx = 18},
-	[18] = {x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 3, nx = 22},
-	[22] = {x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 2, nx = 2},
+	[2] = { x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 0, nx = 14 },
+	[14] = { x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 1, nx = 18 },
+	[18] = { x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 3, nx = 22 },
+	[22] = { x = 0, y = 0, z = -1, pitch = 0, yaw = 2, roll = 2, nx = 2 },
 
-	[3] = {x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 0, nx = 7},
-	[7] = {x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 3, nx = 11},
-	[11] = {x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 1, nx = 21},
-	[21] = {x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 2, nx = 3},
+	[3] = { x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 0, nx = 7 },
+	[7] = { x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 3, nx = 11 },
+	[11] = { x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 1, nx = 21 },
+	[21] = { x = -1, y = 0, z = 0, pitch = 0, yaw = 3, roll = 2, nx = 3 },
 
-	[4] = {x = 0, y = -1, z = 0, pitch = -4.7, yaw = 0, roll = 0, nx = 10},
-	[10] = {x = 0, y = -1, z = 0, pitch = -4.7, yaw = 2, roll = 0, nx = 13},
-	[13] = {x = 0, y = -1, z = 0, pitch = -4.7, yaw = 1, roll = 0, nx = 19},
-	[19] = {x = 0, y = -1, z = 0, pitch = -4.7, yaw = 3, roll = 0, nx = 4},
+	[4] = { x = 0, y = -1, z = 0, pitch = -4.7, yaw = 0, roll = 0, nx = 10 },
+	[10] = { x = 0, y = -1, z = 0, pitch = -4.7, yaw = 2, roll = 0, nx = 13 },
+	[13] = { x = 0, y = -1, z = 0, pitch = -4.7, yaw = 1, roll = 0, nx = 19 },
+	[19] = { x = 0, y = -1, z = 0, pitch = -4.7, yaw = 3, roll = 0, nx = 4 },
 
-	[8] = {x = 0, y = 1, z = 0, pitch = -4.7, yaw = 0, roll = 0, nx = 6},
-	[6] = {x = 0, y = 1, z = 0, pitch = -4.7, yaw = 2, roll = 0, nx = 15},
-	[15] = {x = 0, y = 1, z = 0, pitch = -4.7, yaw = 3, roll = 0, nx = 17},
-	[17] = {x = 0, y = 1, z = 0, pitch = -4.7, yaw = 1, roll = 0, nx = 8},
+	[8] = { x = 0, y = 1, z = 0, pitch = -4.7, yaw = 0, roll = 0, nx = 6 },
+	[6] = { x = 0, y = 1, z = 0, pitch = -4.7, yaw = 2, roll = 0, nx = 15 },
+	[15] = { x = 0, y = 1, z = 0, pitch = -4.7, yaw = 3, roll = 0, nx = 17 },
+	[17] = { x = 0, y = 1, z = 0, pitch = -4.7, yaw = 1, roll = 0, nx = 8 },
 }
 
 -- remove item
 
-local function remove_item(pos, ntype)
-
+craftlib.entity_api.remove_item = function(pos, ntype)
 	local ypos = ntype == "pedestal" and 1 or 0
 
-	del_ent({x = pos.x, y = pos.y + ypos, z = pos.z})
+	craftlib.entity_api.del_entity({ x = pos.x, y = pos.y + ypos, z = pos.z })
 end
 
 -- update entity
 
 local function update_item(pos, ntype, node)
+	craftlib.entity_api.remove_item(pos, ntype)
 
-	remove_item(pos, ntype)
+	local meta = core.get_meta(pos); if not meta then return end
 
-	local meta = core.get_meta(pos) ; if not meta then return end
-
-	local item = meta:get_string("item") ; if item == "" then return end
+	local item = meta:get_string("item"); if item == "" then return end
 
 	local pitch, yaw, roll = 0, 0, 0
 
 	if ntype == "frame" then
-
 		local p2 = node.param2
-		local adjust = facedir[p2] ; if not adjust then return end
+		local adjust = facedir[p2]; if not adjust then return end
 
 		local raise = 6.5 / 16 -- itemframe default
 
@@ -181,40 +170,38 @@ local function update_item(pos, ntype, node)
 		pitch = adjust.pitch
 		yaw = 6.28 - adjust.yaw * 1.57 -- math.pi/2
 		roll = 6.28 - adjust.roll * 1.57
-
 	elseif ntype == "pedestal" then
-
 		pos.y = pos.y + 1.08
 	end
 
-	tmp.nodename = node.name
-	tmp.texture = ItemStack(item):get_name()
+	local nodename = node.name
+	local texture = ItemStack(item):get_name()
 
 	local def = core.registered_items[item]
 
-	tmp.glow = def and def.light_source
+	local glow = def and def.light_source
 
-	local e = core.add_entity(pos, "craftlib:item")
+	local e = core.add_entity(pos, "craftlib:item", nodename .. ';' .. texture .. ';' .. glow)
 
 	if not e then
-		tmp = {} ; return
+		return
 	end
 
 	if ntype == "frame" then
-		e:set_rotation({x = pitch, y = yaw, z = roll})
+		e:set_rotation({ x = pitch, y = yaw, z = roll })
 	end
 end
 
 -- remove entity and drop as item
 
-local function drop_item(pos, ntype, metadata)
-
-	local meta = metadata or core.get_meta(pos) ; if not meta then return end
-	local item = meta:get_string("item") if item == "" then return end
+craftlib.entity_api.drop_item = function(pos, ntype, metadata)
+	local meta = metadata or core.get_meta(pos); if not meta then return end
+	local item = meta:get_string("item")
+	if item == "" then return end
 
 	meta:set_string("item", "")
 
-	remove_item(pos, ntype)
+	craftlib.entity_api.remove_item(pos, ntype)
 
 	meta:set_string("infotext", S("Right-click to add or remove item"))
 
@@ -226,18 +213,16 @@ end
 -- return item to a player's inventory
 
 local function return_item(pos, ntype, metadata, clicker, itemstack)
+	local meta = metadata or core.get_meta(pos); if not meta then return end
 
-	local meta = metadata or core.get_meta(pos) ; if not meta then return end
-
-	local item = meta:get_string("item") ; if item == "" then return end
+	local item = meta:get_string("item"); if item == "" then return end
 
 	local remaining = itemstack:add_item(item)
 
 	if remaining:is_empty() then
-
 		meta:set_string("item", "")
 
-		remove_item(pos, ntype)
+		craftlib.entity_api.remove_item(pos, ntype)
 
 		return itemstack
 	end
@@ -245,30 +230,28 @@ local function return_item(pos, ntype, metadata, clicker, itemstack)
 	local inv = clicker:get_inventory()
 
 	if not inv then
-		drop_item(pos, ntype, metadata) ; return
+		craftlib.entity_api.drop_item(pos, ntype, metadata); return
 	end
 
 	remaining = inv:add_item("main", remaining)
 
 	if remaining:is_empty() then
-
 		meta:set_string("item", "")
 
-		remove_item(pos, ntype)
+		craftlib.entity_api.remove_item(pos, ntype)
 	else
-		drop_item(pos, ntype, metadata)
+		craftlib.entity_api.drop_item(pos, ntype, metadata)
 	end
 end
 
 -- on_place helper function
 
 local function frame_place(itemstack, placer, pointed_thing)
-
 	if pointed_thing.type ~= "node" then return end
 
 	local above = pointed_thing.above
 	local under = pointed_thing.under
-	local dir = {x = under.x - above.x, y = under.y - above.y, z = under.z - above.z}
+	local dir = { x = under.x - above.x, y = under.y - above.y, z = under.z - above.z }
 	local wdir = core.dir_to_wallmounted(dir)
 	local placer_pos = placer:get_pos()
 
@@ -295,7 +278,6 @@ end
 -- helper function to return item description
 
 local function get_desc(itemname)
-
 	local def = core.registered_items[itemname]
 
 	return def and def.description or ""
@@ -303,50 +285,46 @@ end
 
 -- itemframe node and recipe
 
-core.register_node("craftlib:frame",{
+core.register_node("craftlib:frame", {
 	description = S("Item frame"),
 	drawtype = "nodebox",
-	node_box = {type = "fixed", fixed = {-7/16, -7/16, 7/16, 7/16, 7/16, 0.5}},
-	selection_box = {type = "fixed", fixed = {-6/16, -6/16, 7/16, 6/16, 6/16, 0.5}},
-	tiles = {"itemframes_frame.png"},
+	node_box = { type = "fixed", fixed = { -7 / 16, -7 / 16, 7 / 16, 7 / 16, 7 / 16, 0.5 } },
+	selection_box = { type = "fixed", fixed = { -6 / 16, -6 / 16, 7 / 16, 6 / 16, 6 / 16, 0.5 } },
+	tiles = { "itemframes_frame.png" },
 	inventory_image = "itemframes_frame_inv.png",
 	wield_image = "itemframes_frame_inv.png",
 	paramtype = "light",
 	paramtype2 = "facedir",
 	sunlight_propagates = true,
-	groups = {choppy = 2, dig_immediate = 2, flammable = 2, handy = 1, axey = 1},
+	groups = { choppy = 2, dig_immediate = 2, flammable = 2, handy = 1, axey = 1 },
 	sounds = sounds,
 	_mcl_hardness = 0.5,
 
 	on_place = frame_place,
 
 	after_place_node = function(pos, placer, itemstack)
-
 		local meta = core.get_meta(pos)
 
 		meta:set_string("infotext", S("Right-click to add or remove item"))
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
-
 		local name = clicker:get_player_name()
 
 		if not itemstack or core.is_protected(pos, name) then return end
 
-		local meta = core.get_meta(pos) ; if not meta then return end
+		local meta = core.get_meta(pos); if not meta then return end
 		local item = meta:get_string("item")
 		local pos_str = core.pos_to_string(pos)
 
 		if item ~= "" then
-
 			show_msg(name .. " removed " .. item .. " from Itemframe at " .. pos_str)
 
 			if should_return_item then
 				return return_item(pos, "frame", meta, clicker, itemstack)
 			else
-				drop_item(pos, "frame", meta)
+				craftlib.entity_api.drop_item(pos, "frame", meta)
 			end
-
 		else
 			local s = itemstack:take_item()
 			local item = s:to_string()
@@ -363,36 +341,32 @@ core.register_node("craftlib:frame",{
 	end,
 
 	on_destruct = function(pos)
-		drop_item(pos, "frame")
+		craftlib.entity_api.drop_item(pos, "frame")
 	end,
 
 	on_punch = function(pos, node, puncher)
-
 		-- rotate item inside frame when holding sneak and punching
 		if puncher and puncher:get_player_control().sneak
-		and (allow_rotate or not core.is_protected(pos, puncher:get_player_name())) then
-
+			and (allow_rotate or not core.is_protected(pos, puncher:get_player_name())) then
 			local p2 = node.param2
 			local nx = facedir[p2].nx
 
-			core.swap_node(pos, {name = node.name, param2 = nx}) ; node.param2 = nx
+			core.swap_node(pos, { name = node.name, param2 = nx }); node.param2 = nx
 		end
 
 		update_item(pos, "frame", node)
 	end,
 
 	on_blast = function(pos, intensity)
+		craftlib.entity_api.drop_item(pos, "frame")
 
-		drop_item(pos, "frame")
-
-		core.add_item(pos, {name = "craftlib:frame"})
+		core.add_item(pos, { name = "craftlib:frame" })
 
 		core.remove_node(pos)
 	end,
 
 	on_burn = function(pos)
-
-		drop_item(pos, "frame")
+		craftlib.entity_api.drop_item(pos, "frame")
 
 		core.remove_node(pos)
 	end
@@ -400,49 +374,46 @@ core.register_node("craftlib:frame",{
 
 -- invisible itemframe node and recipe
 
-core.register_node("craftlib:frame_invis",{
+core.register_node("craftlib:frame_invis", {
 	description = S("Invisible Item frame"),
 	drawtype = "nodebox",
-	node_box = {type = "fixed", fixed = {-7/16, -7/16, 7/16, 7/16, 7/16, 0.5}},
-	selection_box = {type = "fixed", fixed = {-6/16, -6/16, 7/16, 6/16, 6/16, 0.5}},
-	tiles = {"itemframes_frame_invis.png"},
+	node_box = { type = "fixed", fixed = { -7 / 16, -7 / 16, 7 / 16, 7 / 16, 7 / 16, 0.5 } },
+	selection_box = { type = "fixed", fixed = { -6 / 16, -6 / 16, 7 / 16, 6 / 16, 6 / 16, 0.5 } },
+	tiles = { "itemframes_frame_invis.png" },
 	inventory_image = "itemframes_frame_invis_inv.png",
 	wield_image = "itemframes_frame_invis_inv.png",
 	paramtype = "light",
 	paramtype2 = "facedir",
 	sunlight_propagates = true,
 	use_texture_alpha = "clip",
-	groups = {choppy = 2, dig_immediate = 2, flammable = 2, handy = 1, axey = 1},
+	groups = { choppy = 2, dig_immediate = 2, flammable = 2, handy = 1, axey = 1 },
 	sounds = sounds,
 	_mcl_hardness = 0.5,
 
 	on_place = frame_place,
 
 	after_place_node = function(pos, placer, itemstack)
-
 		local meta = core.get_meta(pos)
 
 		meta:set_string("infotext", S("Right-click to add or remove item"))
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
-
 		local name = clicker:get_player_name()
 
 		if not itemstack or core.is_protected(pos, name) then return end
 
-		local meta = core.get_meta(pos) ; if not meta then return end
+		local meta = core.get_meta(pos); if not meta then return end
 		local item = meta:get_string("item")
 		local pos_str = core.pos_to_string(pos)
 
 		if item ~= "" then
-
 			show_msg(name .. " removed " .. item .. " from Itemframe at " .. pos_str)
 
 			if should_return_item then
 				return return_item(pos, "frame", meta, clicker, itemstack)
 			else
-				drop_item(pos, "frame", meta)
+				craftlib.entity_api.drop_item(pos, "frame", meta)
 			end
 		else
 			local s = itemstack:take_item()
@@ -460,36 +431,32 @@ core.register_node("craftlib:frame_invis",{
 	end,
 
 	on_destruct = function(pos)
-		drop_item(pos, "frame")
+		craftlib.entity_api.drop_item(pos, "frame")
 	end,
 
 	on_punch = function(pos, node, puncher)
-
 		-- rotate item inside frame when holding sneak and punching
 		if puncher and puncher:get_player_control().sneak
-		and (allow_rotate or not core.is_protected(pos, puncher:get_player_name())) then
-
+			and (allow_rotate or not core.is_protected(pos, puncher:get_player_name())) then
 			local p2 = node.param2
 			local nx = facedir[p2].nx
 
-			core.swap_node(pos, {name = node.name, param2 = nx}) ; node.param2 = nx
+			core.swap_node(pos, { name = node.name, param2 = nx }); node.param2 = nx
 		end
 
 		update_item(pos, "frame", node)
 	end,
 
 	on_blast = function(pos, intensity)
+		craftlib.entity_api.drop_item(pos, "frame")
 
-		drop_item(pos, "frame")
-
-		core.add_item(pos, {name = "craftlib:frame_invis"})
+		core.add_item(pos, { name = "craftlib:frame_invis" })
 
 		core.remove_node(pos)
 	end,
 
 	on_burn = function(pos)
-
-		drop_item(pos, "frame")
+		craftlib.entity_api.drop_item(pos, "frame")
 
 		core.remove_node(pos)
 	end
@@ -497,57 +464,54 @@ core.register_node("craftlib:frame_invis",{
 
 -- pedestal node and recipe
 
-core.register_node("craftlib:pedestal",{
+core.register_node("craftlib:pedestal", {
 	description = S("Pedestal"),
 	drawtype = "nodebox",
 	node_box = {
-		type = "fixed", fixed = {
-			{-7/16, -8/16, -7/16, 7/16, -7/16, 7/16}, -- bottom plate
-			{-6/16, -7/16, -6/16, 6/16, -6/16, 6/16}, -- bottom plate (upper)
-			{-0.25, -6/16, -0.25, 0.25, 11/16, 0.25}, -- pillar
-			{-7/16, 11/16, -7/16, 7/16, 12/16, 7/16}, -- top plate
+		type = "fixed",
+		fixed = {
+			{ -7 / 16, -8 / 16, -7 / 16, 7 / 16, -7 / 16, 7 / 16 }, -- bottom plate
+			{ -6 / 16, -7 / 16, -6 / 16, 6 / 16, -6 / 16, 6 / 16 }, -- bottom plate (upper)
+			{ -0.25, -6 / 16, -0.25, 0.25, 11 / 16, 0.25 }, -- pillar
+			{ -7 / 16, 11 / 16, -7 / 16, 7 / 16, 12 / 16, 7 / 16 }, -- top plate
 		}
 	},
-	selection_box = {type = "fixed", fixed = {-7/16, -0.5, -7/16, 7/16, 12/16, 7/16}},
+	selection_box = { type = "fixed", fixed = { -7 / 16, -0.5, -7 / 16, 7 / 16, 12 / 16, 7 / 16 } },
 	tiles = {
 		"itemframes_pedestal_top.png",
 		"itemframes_pedestal_btm.png",
 		"itemframes_pedestal.png"
 	},
 	paramtype = "light",
-	groups = {cracky = 3, pickaxey = 1},
+	groups = { cracky = 3, pickaxey = 1 },
 	sounds = sounds,
 	on_rotate = screwdriver.disallow,
 	_mcl_hardness = 1.5,
 
 	after_place_node = function(pos, placer, itemstack)
-
 		local meta = core.get_meta(pos)
 
 		meta:set_string("infotext", S("Right-click to add or remove item"))
 	end,
 
 	on_rightclick = function(pos, node, clicker, itemstack)
-
 		local name = clicker:get_player_name()
 
 		if not itemstack or core.is_protected(pos, name) then return end
 
-		local meta = core.get_meta(pos) ; if not meta then return end
+		local meta = core.get_meta(pos); if not meta then return end
 		local item = meta:get_string("item")
 		local pos_str = core.pos_to_string(pos)
 
 		if item ~= "" then
-
 			show_msg(name .. " removed " .. item .. " from Pedestal at " .. pos_str)
 
 			if should_return_item then
 				return return_item(pos, "pedestal", meta, clicker, itemstack)
 			else
-				drop_item(pos, "pedestal", meta)
+				craftlib.entity_api.drop_item(pos, "pedestal", meta)
 			end
 		else
-
 			local s = itemstack:take_item()
 			local item = s:to_string()
 
@@ -563,7 +527,7 @@ core.register_node("craftlib:pedestal",{
 	end,
 
 	on_destruct = function(pos)
-		drop_item(pos, "pedestal")
+		craftlib.entity_api.drop_item(pos, "pedestal")
 	end,
 
 	on_punch = function(pos, node, puncher)
@@ -571,12 +535,11 @@ core.register_node("craftlib:pedestal",{
 	end,
 
 	on_blast = function(pos, intensity)
+		local pos2 = { x = pos.x, y = pos.y, z = pos.z }
 
-		local pos2 = {x = pos.x, y = pos.y, z = pos.z}
+		craftlib.entity_api.drop_item(pos, "pedestal")
 
-		drop_item(pos, "pedestal")
-
-		core.add_item(pos2, {name = "craftlib:pedestal"})
+		core.add_item(pos2, { name = "craftlib:pedestal" })
 
 		core.remove_node(pos2)
 	end
@@ -588,11 +551,10 @@ core.register_node("craftlib:pedestal",{
 core.register_lbm({
 	label = "Restore itemframe entities",
 	name = "craftlib:restore_entities",
-	nodenames = {"craftlib:frame", "craftlib:pedestal", "craftlib:frame_invis"},
+	nodenames = { "craftlib:frame", "craftlib:pedestal", "craftlib:frame_invis" },
 	run_at_every_load = true,
 
 	action = function(pos, node)
-
 		local ypos = 0
 		local ntype = "frame"
 
@@ -603,7 +565,7 @@ core.register_lbm({
 
 		pos.y = pos.y + ypos
 
-		del_ent(pos)
+		craftlib.entity_api.del_entity(pos)
 
 		pos.y = pos.y - ypos
 

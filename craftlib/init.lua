@@ -4,6 +4,7 @@ craftlib = {
         active = "craftlib:crafting_activated",
         inv = "inventory" --i_have_hands checks for this list
     },
+    entity_api = {},
     registered_crafts = {},
     registered_associations = {},
     registered_replacements = {},
